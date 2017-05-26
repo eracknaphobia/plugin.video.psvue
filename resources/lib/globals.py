@@ -145,9 +145,11 @@ def list_episode(show):
     airing_date = show['airing_date']
     airing_date = stringToDate(airing_date, "%Y-%m-%dT%H:%M:%S.000Z")
     airing_date = UTCToLocal(airing_date)
-    broadcast_date = show['broadcast_date']
-    broadcast_date = stringToDate(broadcast_date, "%Y-%m-%dT%H:%M:%S.000Z")
-    broadcast_date = UTCToLocal(broadcast_date)
+    broadcast_date = ''
+    if 'broadcast_date' in show:
+        broadcast_date = show['broadcast_date']
+        broadcast_date = stringToDate(broadcast_date, "%Y-%m-%dT%H:%M:%S.000Z")
+        broadcast_date = UTCToLocal(broadcast_date)
 
     genre = ''
     for item in show['genres']:
@@ -262,7 +264,7 @@ def put_resume_time():
     Accept-Language: en-US
     X-Requested-With: com.snei.vue.android
 
-    {"series_id":21188,"program_id":1320750,"channel_id":25039,"tms_id":"EP005544655496","airing_id":14626670,"last_watch_date":"2017-04-28T00:40:43Z","last_timecode":"01:46:29","start_timecode":"00:00:00:00","fully_watched":false,"stream_type":"dvr"}    
+    {"series_id":21188,"program_id":1320750,"channel_id":25039,"tms_id":"EP005544655496","airing_id":14626670,"last_watch_date":"2017-04-28T00:40:43Z","last_timecode":"01:46:29","start_timecode":"00:00:00:00","fully_watched":false,"stream_type":"dvr"}
     """
     url = 'https://sentv-user-action.totsuko.tv/sentv_user_action/ws/v2/watch_history'
     headers = {"Accept": "*/*",
@@ -465,7 +467,13 @@ def get_json(url):
 
     if r.status_code != 200:
         dialog = xbmcgui.Dialog()
-        dialog.notification('Error '+str(r.status_code), 'The request could not be completed.', xbmcgui.NOTIFICATION_INFO, 5000)
+        msg = 'The request could not be completed.'
+        try:
+            json_source = r.json()
+            msg = json_source['header']['error']['message']
+        except:
+            pass
+        dialog.notification('Error '+str(r.status_code), msg, xbmcgui.NOTIFICATION_INFO, 5000)
         sys.exit()
 
     return r.json()
