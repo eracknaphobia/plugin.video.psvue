@@ -300,7 +300,6 @@ def login():
         USERNAME = dialog.input('Please enter your username', type=xbmcgui.INPUT_ALPHANUM)
         if USERNAME != '':
             ADDON.setSetting(id='username', value=USERNAME)
-            USERNAME = json.dumps(USERNAME)
         else:
             sys.exit()
 
@@ -311,7 +310,6 @@ def login():
                                 option=xbmcgui.ALPHANUM_HIDE_INPUT)
         if PASSWORD != '':
             ADDON.setSetting(id='password', value=PASSWORD)
-            PASSWORD = json.dumps(PASSWORD)
         else:
             sys.exit()
 
@@ -326,7 +324,6 @@ def login():
                    "Connection": "Keep-Alive"
                    }
 
-        payload = 'authentication_type=password&username=' + USERNAME + '&password=' + PASSWORD + '&client_id=' + LOGIN_CLIENT_ID
         r = requests.post(url, headers=headers, cookies=load_cookies(), data=payload, verify=VERIFY)
         json_source = r.json()
         save_cookies(r.cookies)
