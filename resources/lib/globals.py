@@ -324,6 +324,7 @@ def login():
                    "Connection": "Keep-Alive"
                    }
 
+        payload = 'authentication_type=password&username='+urllib.quote_plus(USERNAME)+'&password='+urllib.quote_plus(PASSWORD)+'&client_id='+LOGIN_CLIENT_ID           
         r = requests.post(url, headers=headers, cookies=load_cookies(), data=payload, verify=VERIFY)
         json_source = r.json()
         save_cookies(r.cookies)
