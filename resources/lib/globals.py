@@ -101,8 +101,9 @@ def list_show(show):
             if genre != '': genre += ', '
             genre += item['genre']
 
-        plot = ''
-        if 'synopsis' in show: plot = show['synopsis']
+        plot = get_dict_item('series_synopsis', show)
+        if plot == '': plot = get_dict_item('synopsis', show)
+
 
         # if watched = true look in airing for last time code
         # "last_timecode": "00:10:54",
@@ -120,9 +121,9 @@ def list_episodes(show_id):
 
     json_source = get_json(url)
 
-    # Sort by airing_date
+    # Sort by airing_date newest to oldest
     json_source = json_source['body']['items']
-    json_source = sorted(json_source, key=lambda k: k['airing_date'], reverse=False)
+    json_source = sorted(json_source, key=lambda k: k['airing_date'], reverse=True)
 
     for show in json_source:
         list_episode(show)
@@ -156,14 +157,12 @@ def list_episode(show):
         if genre != '': genre += ', '
         genre += item['genre']
 
-    plot = ''
-    if 'synopsis' in show: plot = show['synopsis']
+    plot = get_dict_item('synopsis', show)
 
     if str(show['playable']).upper() == 'FALSE':
         # Add airing date/time to title
         # airing = airing.strftime('%H:%M')
         title = title + ' ' +  airing_date.strftime('%m/%d/%y') + ' ' + airing_date.strftime('%I:%M %p').lstrip('0')
-
 
 
     # if watched = true look in airing for last time code
@@ -174,6 +173,8 @@ def list_episode(show):
 
     info = {'plot': plot, 'tvshowtitle': show_title, 'title': title, 'originaltitle': title, 'genre': genre,
             'aired': airing_date.strftime('%Y-%m-%d'), 'premiered': broadcast_date.strftime('%Y-%m-%d')}
+
+
     addStream(title, show_url, title, icon, fanart, info)
 
 
@@ -203,15 +204,22 @@ def list_channel(channel):
             if genre != '': genre += ', '
             genre += item['genre']
 
-        plot = ''
-        if 'synopsis' in channel: plot = channel['synopsis']
-        # try: plot = channel['synopsis']
-        # except: pass
+        plot = get_dict_item('synopsis', channel)
+        season = get_dict_item('season_num', channel)
+        episode = get_dict_item('episode_num', channel)
 
         channel_url = CHANNEL_URL + '/' + channel_id
 
-        info = {'plot': plot, 'tvshowtitle': title, 'title': title, 'originaltitle': title, 'genre': genre}
+        info = {'season':season, 'episode':episode, 'plot': plot, 'tvshowtitle': title, 'title': title, 'originaltitle': title, 'genre': genre}
+
         addStream(title, channel_url, title, icon, fanart, info)
+
+
+def get_dict_item(key, dictionary):
+    if key in dictionary:
+        return dictionary[key]
+    else:
+        return ''
 
 
 def get_stream(url):
@@ -297,7 +305,7 @@ def login():
     global USERNAME
     if USERNAME == '':
         dialog = xbmcgui.Dialog()
-        USERNAME = dialog.input('Please enter your username', type=xbmcgui.INPUT_ALPHANUM)
+        USERNAME = dialog.input(LOCAL_STRING(30202), type=xbmcgui.INPUT_ALPHANUM)
         if USERNAME != '':
             ADDON.setSetting(id='username', value=USERNAME)
         else:
@@ -306,7 +314,7 @@ def login():
     global PASSWORD
     if PASSWORD == '':
         dialog = xbmcgui.Dialog()
-        PASSWORD = dialog.input('Please enter your password', type=xbmcgui.INPUT_ALPHANUM,
+        PASSWORD = dialog.input(LOCAL_STRING(30203), type=xbmcgui.INPUT_ALPHANUM,
                                 option=xbmcgui.ALPHANUM_HIDE_INPUT)
         if PASSWORD != '':
             ADDON.setSetting(id='password', value=PASSWORD)
@@ -324,7 +332,7 @@ def login():
                    "Connection": "Keep-Alive"
                    }
 
-        payload = 'authentication_type=password&username='+urllib.quote_plus(USERNAME)+'&password='+urllib.quote_plus(PASSWORD)+'&client_id='+LOGIN_CLIENT_ID           
+        payload = 'authentication_type=password&username='+urllib.quote_plus(USERNAME)+'&password='+urllib.quote_plus(PASSWORD)+'&client_id='+LOGIN_CLIENT_ID
         r = requests.post(url, headers=headers, cookies=load_cookies(), data=payload, verify=VERIFY)
         json_source = r.json()
         save_cookies(r.cookies)
@@ -350,7 +358,7 @@ def login():
 
 def two_step_verification(ticket_uuid):
     dialog = xbmcgui.Dialog()
-    code = dialog.input('Please enter your verification code', type=xbmcgui.INPUT_ALPHANUM)
+    code = dialog.input(LOCAL_STRING(30204), type=xbmcgui.INPUT_ALPHANUM)
     if code == '': sys.exit()
 
     url = 'https://auth.api.sonyentertainmentnetwork.com/2.0/ssocookie'
@@ -448,8 +456,11 @@ def get_reqpayload():
                }
 
     r = requests.get(url, headers=headers, verify=VERIFY)
-    req_payload = str(r.headers['reqPayload'])
-    ADDON.setSetting(id='reqPayload', value=req_payload)
+    if 'reqPayload' in r.headers:
+        req_payload = str(r.headers['reqPayload'])
+        ADDON.setSetting(id='reqPayload', value=req_payload)
+    else:
+        sys.exit()
 
 
 def get_json(url):
