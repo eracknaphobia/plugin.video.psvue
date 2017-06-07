@@ -1,16 +1,17 @@
 import os, xbmc, xbmcaddon, xbmcgui
 import cookielib, requests, urllib
+from datetime import datetime
 
 
 class SONY():
     addon = xbmcaddon.Addon()
+    api_url = 'https://auth.api.sonyentertainmentnetwork.com/2.0'
     device_id = ''
     localized = addon.getLocalizedString
     login_client_id = '71a7beb8-f21a-47d9-a604-2e71bee24fe0'
     npsso = ''
     password = ''
     req_client_id = 'dee6a88d-c3be-4e17-aec5-1018514cee40'
-    req_payload = ''
     ua_android = 'Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/44.0.2403.119 Safari/537.36'
     ua_sony = 'com.sony.snei.np.android.sso.share.oauth.versa.USER_AGENT'
     username = ''
@@ -21,9 +22,12 @@ class SONY():
         self.device_id = self.addon.getSetting('deviceId')
         self.npsso = self.addon.getSetting('npsso')
         self.password = self.addon.getSetting('password')
-        self.req_payload = self.addon.getSetting('reqPayload')
         self.username = self.addon.getSetting('username')
 
+
+    def check_auth(self):
+        self.check_login()
+        self.authorize_device()
 
 
     def check_login(self):
@@ -62,7 +66,7 @@ class SONY():
                 sys.exit()
 
         if self.username != '' and self.password != '':
-            url = 'https://auth.api.sonyentertainmentnetwork.com/2.0/ssocookie'
+            url = self.api_url + '/ssocookie'
             headers = {"Accept": "*/*",
                        "Content-type": "application/x-www-form-urlencoded",
                        "Origin": "https://id.sonyentertainmentnetwork.com",
@@ -99,7 +103,7 @@ class SONY():
         code = dialog.input(self.localized(30204), type=xbmcgui.INPUT_ALPHANUM)
         if code == '': sys.exit()
 
-        url = 'https://auth.api.sonyentertainmentnetwork.com/2.0/ssocookie'
+        url = self.api_url + '/ssocookie'
         headers = {
             "Accept": "*/*",
             "Content-type": "application/x-www-form-urlencoded",
@@ -129,8 +133,25 @@ class SONY():
             sys.exit()
 
 
+    def logout(self):
+        url = self.api_url + '/ssocookie'
+        headers = {
+            "User-Agent": self.ua_sony,
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip"
+        }
+
+        r = requests.delete(url, headers=headers, cookies=self.load_cookies(), verify=self.verify)
+        # Clear addon settings
+        self.addon.setSetting(id='reqPayload', value='')
+        self.addon.setSetting(id='last_auth', value='')
+        self.addon.setSetting(id='npsso', value='')
+        self.addon.setSetting(id='default_profile', value='')
+
+
     def get_grant_code(self):
-        url = 'https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize'
+        url = self.api_url + '/oauth/authorize'
         url += '?response_type=code'
         url += '&client_id=' + self.req_client_id
         url += '&redirect_uri=https%3A%2F%2Fthemis.dl.playstation.net%2Fthemis%2Fzartan%2Fredirect.html'
@@ -151,13 +172,13 @@ class SONY():
         if 'X-NP-GRANT-CODE' in r.headers:
             code = r.headers['X-NP-GRANT-CODE']
         else:
-            self.error_msg('Auth Failed','Could not retrieve grant code')
+            self.error_msg(self.localized(30207), self.localized(30208))
             sys.exit()
 
         return code
 
 
-    def reauthorize_device(self):
+    def authorize_device(self):
         url = 'https://sentv-user-auth.totsuko.tv/sentv_user_auth/ws/oauth2/token'
         url += '?device_type_id=android_tablet'
         url += '&device_id=' + self.device_id
@@ -167,27 +188,30 @@ class SONY():
         headers = {
             'Origin': 'https://themis.dl.playstation.net',
             'User-Agent': self.ua_android,
-            'reauth': '1',
-            'reqPayload': self.addon.getSetting(id='reqPayload'),
             'Accept': '*/*',
             'Connection': 'Keep-Alive',
             'Accept-Encoding': 'gzip'
         }
+        if self.addon.getSetting(id='reqPayload') != '':
+            headers['reauth'] = '1'
+            headers['reqPayload'] = self.addon.getSetting(id='reqPayload')
 
         r = requests.get(url, headers=headers, verify=self.verify)
         if 'reqPayload' in r.headers:
             req_payload = str(r.headers['reqPayload'])
             self.addon.setSetting(id='reqPayload', value=req_payload)
+            auth_time = r.json()['header']['time_stamp']
+            self.addon.setSetting(id='last_auth', value=auth_time)
         else:
-            self.error_msg('Auth Failed','Could not retrieve the reqpayload')
+            self.error_msg(self.localized(30207), self.localized(30209))
             sys.exit()
 
 
-    def get_profiles():
+    def get_profiles(self):
         url = 'https://sentv-user-ext.totsuko.tv/sentv_user_ext/ws/v2/profile/ids'
         headers = {
             'User-Agent': self.ua_android,
-            'reqPayload': self.req_payload,
+            'reqPayload': self.addon.getSetting(id='reqPayload'),
             'Accept': '*/*',
             'Origin': 'https://themis.dl.playstation.net',
             'Connection': 'Keep-Alive',
@@ -205,14 +229,79 @@ class SONY():
                 prof_list.append(str(profile['profile_name']))
 
             dialog = xbmcgui.Dialog()
-            ret = dialog.select('Choose Profile', prof_list)
+            ret = dialog.select(self.localized(30210), prof_list)
             if ret >= 0:
-                set_profile(prof_dict[prof_list[ret]])
+                self.set_profile(prof_dict[prof_list[ret]])
             else:
                 sys.exit()
         else:
-            self.error_msg('Profile Not Found', 'Your profile list could not be retrieved.')
+            self.error_msg(self.localized(30205), self.localized(30206))
             sys.exit()
+
+
+    def set_profile(self, profile_id):
+        url = 'https://sentv-user-ext.totsuko.tv/sentv_user_ext/ws/v2/profile/' + profile_id
+        headers = {
+            'User-Agent': self.ua_android,
+            'reqPayload': self.addon.getSetting(id='reqPayload'),
+            'Accept': '*/*',
+            'Origin': 'https://themis.dl.playstation.net',
+            'Host': 'sentv-user-ext.totsuko.tv',
+            'Connection': 'Keep-Alive',
+            'Accept-Encoding': 'gzip'
+        }
+
+        r = requests.get(url, headers=headers, verify=self.verify)
+        req_payload = str(r.headers['reqPayload'])
+        self.addon.setSetting(id='reqPayload', value=req_payload)
+        auth_time = r.json()['header']['time_stamp']
+        self.addon.setSetting(id='last_auth', value=auth_time)
+        self.addon.setSetting(id='default_profile', value=profile_id)
+
+
+    def put_resume_time(self):
+        """
+        PUT https://sentv-user-action.totsuko.tv/sentv_user_action/ws/v2/watch_history HTTP/1.1
+        Host: sentv-user-action.totsuko.tv
+        Connection: keep-alive
+        Content-Length: 247
+        Accept: */*
+        reqPayload: redacted
+        User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/44.0.2403.119 Safari/537.36
+        Origin: https://themis.dl.playstation.net
+        Content-Type: application/json
+        Referer: https://themis.dl.playstation.net/themis/zartan/2.2.2b/
+        Accept-Encoding: gzip, deflate
+        Accept-Language: en-US
+        X-Requested-With: com.snei.vue.android
+
+        {"series_id":redacted,"program_id":redacted,"channel_id":redacted,"tms_id":"EP005544655496","airing_id":redacted,"last_watch_date":"2017-04-28T00:40:43Z","last_timecode":"01:46:29","start_timecode":"00:00:00:00","fully_watched":false,"stream_type":"dvr"}
+        """
+        url = 'https://sentv-user-action.totsuko.tv/sentv_user_action/ws/v2/watch_history'
+        headers = {"Accept": "*/*",
+                   "Content-type": "application/json",
+                   "Origin": "https://themis.dl.playstation.net",
+                   "Accept-Language": "en-US",
+                   "Referer": "https://themis.dl.playstation.net/themis/zartan/2.2.2b/",
+                   "Accept-Encoding": "gzip, deflate",
+                   "User-Agent": self.ua_android,
+                   "Connection": "Keep-Alive",
+                   'reqPayload': self.addon.getSetting(id='reqPayload'),
+                   'X-Requested-With': 'com.snei.vue.android'
+                   }
+
+        payload = '{"series_id":redacted,'
+        payload += '"program_id":redacted,'
+        payload += '"channel_id":redacted,'
+        payload += '"tms_id":"redacted",'
+        payload += '"airing_id":redacted,'
+        payload += '"last_watch_date":"2017-04-28T00:40:43Z",'
+        payload += '"last_timecode":"01:46:29",'
+        payload += '"start_timecode":"00:00:00:00",'
+        payload += '"fully_watched":false,'
+        payload += '"stream_type":"dvr"}'
+
+        r = requests.put(url, headers=headers, data=payload, verify=self.verify)
 
 
     def save_cookies(self, cookiejar):
