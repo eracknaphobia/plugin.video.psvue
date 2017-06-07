@@ -1,4 +1,4 @@
-from resources.lib.globals import *
+from resources.lib.ps_vue import *
 
 params=get_params()
 url=None
@@ -23,13 +23,13 @@ try:
 except:
     pass
 
-if mode != 900: check_reqpayload()
+if mode < 900: check_reqpayload()
 
-if mode == None:                        
+if mode == None:
     if ADDON.getSetting(id='default_profile') == '':
         get_profiles()
-    
-    main_menu()    
+
+    main_menu()
 
 elif mode == 50:
     timeline()
