@@ -25,11 +25,12 @@ except:
 
 
 sony = SONY()
-if ADDON.getSetting(id='last_auth') != '':
-    last_auth = stringToDate(ADDON.getSetting(id='last_auth'), "%Y-%m-%dT%H:%M:%S.%fZ")
-    if (datetime.now() - last_auth).total_seconds() >= 5400: sony.check_auth()
-else:
-    sony.check_auth()
+if mode != 999:
+    if ADDON.getSetting(id='last_auth') != '':
+        last_auth = stringToDate(ADDON.getSetting(id='last_auth'), "%Y-%m-%dT%H:%M:%S.%fZ")
+        if (datetime.utcnow() - last_auth).total_seconds() >= 900: sony.check_auth()
+    else:
+        sony.check_auth()
 
 
 if mode == None:

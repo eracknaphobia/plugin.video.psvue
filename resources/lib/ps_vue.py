@@ -61,7 +61,11 @@ def featured():
 
 def list_timeline():
     url = 'https://sentv-user-ext.totsuko.tv/sentv_user_ext/ws/v2/profile/ids'
-    airing_id = get_json(url)['body']['launch_program']['airing_id']
+    json_source = get_json(url)
+    try:
+        airing_id = json_source['body']['launch_program']['airing_id']
+    except:
+        sys.exit()
 
     json_source = get_json(EPG_URL + '/timeline/' + str(airing_id))
 
@@ -232,13 +236,15 @@ def get_stream(url):
                "Accept-Encoding": "deflate",
                "User-Agent": UA_ANDROID,
                "Connection": "Keep-Alive",
-               #'reqPayload': ADDON.getSetting(id='reqPayload')
+               'reqPayload': ADDON.getSetting(id='reqPayload')
                }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
     json_source = r.json()
     stream_url = json_source['body']['video']
-    stream_url = stream_url + '|User-Agent=Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='reqPayload') + '"')
+    stream_url += '|User-Agent='
+    stream_url += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'    
+    stream_url += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='reqPayload') + '"')
 
     listitem = xbmcgui.ListItem(path=stream_url)
     # listitem.setProperty('ResumeTime', '600')
