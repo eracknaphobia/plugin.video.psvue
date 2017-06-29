@@ -176,8 +176,8 @@ def list_episode(show):
     # channel_url = CHANNEL_URL+'/'+show_id
     show_url = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/' + airing_id
 
-    info = {'plot': plot, 'tvshowtitle': show_title, 'title': title, 'originaltitle': title, 'genre': genre,
-            'aired': airing_date.strftime('%Y-%m-%d'), 'premiered': broadcast_date.strftime('%Y-%m-%d')}
+    info = {'plot': plot, 'tvshowtitle': show_title, 'title': title, 'originaltitle': title, 'genre': genre, 'aired': airing_date.strftime('%Y-%m-%d')}
+    if broadcast_date != '': info['premiered'] = broadcast_date.strftime('%Y-%m-%d')
 
 
     addStream(title, show_url, title, icon, fanart, info)
@@ -243,7 +243,7 @@ def get_stream(url):
     json_source = r.json()
     stream_url = json_source['body']['video']
     stream_url += '|User-Agent='
-    stream_url += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'    
+    stream_url += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
     stream_url += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='reqPayload') + '"')
 
     listitem = xbmcgui.ListItem(path=stream_url)
