@@ -90,11 +90,11 @@ class SONY():
                     self.two_step_verification(ticket_uuid)
             elif 'error_description' in json_source:
                 msg = json_source['error_description']
-                self.error_msg(self.localized(30200), msg)
+                self.notification_msg(self.localized(30200), msg)
                 sys.exit()
             else:
                 # Something went wrong during login
-                self.error_msg(self.localized(30200), self.localized(30201))
+                self.notification_msg(self.localized(30200), self.localized(30201))
                 sys.exit()
 
 
@@ -125,11 +125,11 @@ class SONY():
             self.addon.setSetting(id='npsso', value=npsso)
         elif 'error_description' in json_source:
             msg = json_source['error_description']
-            self.error_msg(self.localized(30200), msg)
+            self.notification_msg(self.localized(30200), msg)
             sys.exit()
         else:
             # Something went wrong during login
-            self.error_msg(self.localized(30200), self.localized(30201))
+            self.notification_msg(self.localized(30200), self.localized(30201))
             sys.exit()
 
 
@@ -173,7 +173,7 @@ class SONY():
             code = r.headers['X-NP-GRANT-CODE']
             self.save_cookies(r.cookies)
         else:
-            self.error_msg(self.localized(30207), self.localized(30208))
+            self.notification_msg(self.localized(30207), self.localized(30208))
             sys.exit()
 
         return code
@@ -204,7 +204,7 @@ class SONY():
             auth_time = r.json()['header']['time_stamp']
             self.addon.setSetting(id='last_auth', value=auth_time)
         else:
-            self.error_msg(self.localized(30207), self.localized(30209))
+            self.notification_msg(self.localized(30207), self.localized(30209))
             sys.exit()
 
 
@@ -236,7 +236,7 @@ class SONY():
             else:
                 sys.exit()
         else:
-            self.error_msg(self.localized(30205), self.localized(30206))
+            self.notification_msg(self.localized(30205), self.localized(30206))
             sys.exit()
 
 
@@ -331,6 +331,6 @@ class SONY():
         return cj
 
 
-    def error_msg(self, title, msg):
+    def notification_msg(self, title, msg):
         dialog = xbmcgui.Dialog()
         dialog.notification(title, msg, xbmcgui.NOTIFICATION_INFO, 5000)

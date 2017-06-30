@@ -309,10 +309,10 @@ def stringToDate(string, date_format):
 def create_device_id():
     android_id = ''.join(random.choice('0123456789abcdef') for i in range(16))
     android_id = android_id.rjust(30, '0')
-    manufacturer = 'ASUS'
+    manufacturer = 'Asus'
     model = 'Nexus 7'
     manf_model = ":%s:%s" % (manufacturer.rjust(10, ' '), model.rjust(10, ' '))
-    manf_model = manf_model.encode("hex")
+    manf_model = manf_model.encode("hex").upper()
     zero = '0'
     device_id = "0000%s%s01a8%s%s" % ("0007", "0002", android_id, manf_model + zero.ljust(32, '0'))
 
@@ -397,7 +397,12 @@ DEVICE_ID = ADDON.getSetting(id='deviceId')
 
 amazon_device = 'Amazon'
 amazon_device = amazon_device.encode("hex")
-if amazon_device in DEVICE_ID: DEVICE_ID = ''
+old_asus = 'ASUS'
+old_asus = old_asus.encode("hex")
+if amazon_device in DEVICE_ID or old_asus in DEVICE_ID:
+    sony = SONY()
+    sony.logout()
+    DEVICE_ID = ''
 
 if DEVICE_ID == '':
     create_device_id()
