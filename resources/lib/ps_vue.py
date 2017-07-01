@@ -384,6 +384,22 @@ def get_params():
 
     return param
 
+def check_device_id():
+    DEVICE_ID = ADDON.getSetting(id='deviceId')
+    amazon_device = 'Amazon'
+    amazon_device = amazon_device.encode("hex")
+    old_asus = 'ASUS'    
+    old_asus = old_asus.encode("hex")
+    if amazon_device in DEVICE_ID or old_asus in DEVICE_ID:
+        sony = SONY()
+        sony.logout()
+        DEVICE_ID = ''
+
+    if DEVICE_ID == '':
+        create_device_id()
+        DEVICE_ID = ADDON.getSetting(id='deviceId')
+
+
 
 addon_handle = int(sys.argv[1])
 ADDON = xbmcaddon.Addon()
@@ -393,21 +409,6 @@ FANART = os.path.join(ROOTDIR, "resources", "fanart.jpg")
 ICON = os.path.join(ROOTDIR, "resources", "icon.png")
 
 ADDON_PATH_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
-DEVICE_ID = ADDON.getSetting(id='deviceId')
-
-amazon_device = 'Amazon'
-amazon_device = amazon_device.encode("hex")
-old_asus = 'ASUS'
-old_asus = old_asus.encode("hex")
-if amazon_device in DEVICE_ID or old_asus in DEVICE_ID:
-    sony = SONY()
-    sony.logout()
-    DEVICE_ID = ''
-
-if DEVICE_ID == '':
-    create_device_id()
-    DEVICE_ID = ADDON.getSetting(id='deviceId')
-
 UA_ANDROID = 'Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/44.0.2403.119 Safari/537.36'
 CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/channel'
 EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'

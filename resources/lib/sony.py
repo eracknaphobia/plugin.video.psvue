@@ -143,6 +143,7 @@ class SONY():
         }
 
         r = requests.delete(url, headers=headers, cookies=self.load_cookies(), verify=self.verify)
+        self.save_cookies(r.cookies)
         # Clear addon settings
         self.addon.setSetting(id='reqPayload', value='')
         self.addon.setSetting(id='last_auth', value='')

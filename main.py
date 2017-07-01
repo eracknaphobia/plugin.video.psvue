@@ -24,6 +24,8 @@ except:
     pass
 
 
+check_device_id()
+
 sony = SONY()
 if mode < 998:
     if ADDON.getSetting(id='last_auth') != '':
