@@ -172,3 +172,7 @@ msgstr ""
 msgctxt "#30222"
 msgid "Search"
 msgstr ""
+
+msgctxt "#30223"
+msgid "Main Menu"
+msgstr ""
