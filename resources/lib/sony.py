@@ -6,6 +6,7 @@ from datetime import datetime
 class SONY():
     addon = xbmcaddon.Addon()
     api_url = 'https://auth.api.sonyentertainmentnetwork.com/2.0'
+    user_action_url = 'https://sentv-user-action.totsuko.tv/sentv_user_action/ws/v2'
     device_id = ''
     localized = addon.getLocalizedString
     login_client_id = '71a7beb8-f21a-47d9-a604-2e71bee24fe0'
@@ -261,6 +262,52 @@ class SONY():
         self.addon.setSetting(id='default_profile', value=profile_id)
 
 
+    def add_to_myshows(self, program_id, series_id, tms_id):
+        url = self.user_action_url+'/favorite'
+        headers = {"Accept": "*/*",
+                   "Content-type": "application/json",
+                   "Origin": "https://vue.playstation.com",
+                   "Referer": "https://vue.playstation.com/watch/home",
+                   "Accept-Language": "en-US,en;q=0.8",
+                   "Accept-Encoding": "gzip, deflate, br",
+                   "User-Agent": self.ua_android,
+                   "Connection": "Keep-Alive",
+                   "reqPayload": self.addon.getSetting(id='reqPayload')
+                   }
+
+        payload = '{"program_id":'+program_id+',"series_id":'+series_id+',"tms_id":"'+tms_id+'"}'
+        r = requests.post(url, headers=headers, cookies=self.load_cookies(), data=payload, verify=self.verify)
+
+        if r.status_code == 200:
+            self.notification_msg("Success!", "Added to favorites")
+        else:
+            self.notification_msg("Fail!", "Not added")
+
+
+    def remove_from_myshows(self, program_id, series_id, tms_id):
+        dialog = xbmcgui.Dialog()
+        ret = dialog.yesno('Remove Show', 'Are you sure you want to remove this from My Shows?')
+        url = self.user_action_url+'/favorite'
+        headers = {"Accept": "*/*",
+                   "Content-type": "application/json",
+                   "Origin": "https://vue.playstation.com",
+                   "Referer": "https://vue.playstation.com/watch/home",
+                   "Accept-Language": "en-US,en;q=0.8",
+                   "Accept-Encoding": "gzip, deflate, br",
+                   "User-Agent": self.ua_android,
+                   "Connection": "Keep-Alive",
+                   "reqPayload": self.addon.getSetting(id='reqPayload')
+                   }
+
+        payload = '{"program_id":'+program_id+',"series_id":'+series_id+',"tms_id":"'+tms_id+'"}'
+        r = requests.delete(url, headers=headers, cookies=self.load_cookies(), data=payload, verify=self.verify)
+
+        if r.status_code == 200:
+            self.notification_msg("Success!", "Added to favorites")
+        else:
+            self.notification_msg("Fail!", "Not added")
+
+
     def put_resume_time(self):
         """
         PUT https://sentv-user-action.totsuko.tv/sentv_user_action/ws/v2/watch_history HTTP/1.1
@@ -277,9 +324,9 @@ class SONY():
         Accept-Language: en-US
         X-Requested-With: com.snei.vue.android
 
-        {"series_id":redacted,"program_id":redacted,"channel_id":redacted,"tms_id":"EP005544655496","airing_id":redacted,"last_watch_date":"2017-04-28T00:40:43Z","last_timecode":"01:46:29","start_timecode":"00:00:00:00","fully_watched":false,"stream_type":"dvr"}
+        {"series_id":redacted,"program_id":redacted,"channel_id":redacted,"tms_id":"redacted","airing_id":redacted,"last_watch_date":"2017-04-28T00:40:43Z","last_timecode":"01:46:29","start_timecode":"00:00:00:00","fully_watched":false,"stream_type":"dvr"}
         """
-        url = 'https://sentv-user-action.totsuko.tv/sentv_user_action/ws/v2/watch_history'
+        url = self.user_action_url+'/watch_history'
         headers = {"Accept": "*/*",
                    "Content-type": "application/json",
                    "Origin": "https://themis.dl.playstation.net",
@@ -311,7 +358,7 @@ class SONY():
         cookie_file = os.path.join(addon_profile_path, 'cookies.lwp')
         cj = cookielib.LWPCookieJar()
         try:
-            cj.load(cookie_file,ignore_discard=True)            
+            cj.load(cookie_file,ignore_discard=True)
         except:
             pass
         for c in cookiejar:

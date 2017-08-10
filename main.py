@@ -4,27 +4,26 @@ params=get_params()
 url=None
 name=None
 mode=None
-show_id=None
+program_id=None
+series_id=None
+tms_is=None
 
-try:
-    url=urllib.unquote_plus(params["url"])
-except:
-    pass
-try:
-    name=urllib.unquote_plus(params["name"])
-except:
-    pass
-try:
-    mode=int(params["mode"])
-except:
-    pass
-try:
-    show_id=params["show_id"]
-except:
-    pass
+try: url=urllib.unquote_plus(params["url"])
+except: pass
+try: name=urllib.unquote_plus(params["name"])
+except: pass
+try: mode=int(params["mode"])
+except: pass
+try: program_id=params["program_id"]
+except: pass
+try: series_id=params["series_id"]
+except: pass
+try: tms_id=params["tms_id"]
+except: pass
 
 
 check_device_id()
+
 
 sony = SONY()
 if mode < 998:
@@ -45,7 +44,7 @@ elif mode == 100:
     my_shows()
 
 elif mode == 150:
-    list_episodes(show_id)
+    list_episodes(program_id)
 
 elif mode == 200:
     favorite_channels()
@@ -87,6 +86,13 @@ elif mode == 1000:
     sony.logout()
     ADDON.setSetting(id='deviceId', value='')
     sony.notification_msg(LOCAL_STRING(30006), LOCAL_STRING(30007))
+
+elif mode == 1001:
+    sony.add_to_myshows(program_id, series_id, tms_id)
+
+elif mode == 1002:
+    sony.remove_from_myshows(program_id, series_id, tms_id)
+
 
 if mode != None and mode != 800 and mode != 750:
     xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)
