@@ -4,15 +4,21 @@ params=get_params()
 url=None
 name=None
 mode=None
-program_id=None
-series_id=None
-tms_is=None
+airing_id='null'
+channel_id='null'
+program_id='null'
+series_id='null'
+tms_id='null'
 
 try: url=urllib.unquote_plus(params["url"])
 except: pass
 try: name=urllib.unquote_plus(params["name"])
 except: pass
 try: mode=int(params["mode"])
+except: pass
+try: airing_id=params["airing_id"]
+except: pass
+try: channel_id=params["channel_id"]
 except: pass
 try: program_id=params["program_id"]
 except: pass
@@ -71,8 +77,8 @@ elif mode == 800:
     sony.get_profiles()
     main_menu()
 
-elif mode == 900:
-    get_stream(url)
+elif mode == 900:    
+    get_stream(url, airing_id, channel_id, program_id, series_id, tms_id)
 
 elif mode == 998:
     sys.exit()

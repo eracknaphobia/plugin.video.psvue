@@ -308,24 +308,7 @@ class SONY():
             self.notification_msg("Fail!", "Not added")
 
 
-    def put_resume_time(self):
-        """
-        PUT https://sentv-user-action.totsuko.tv/sentv_user_action/ws/v2/watch_history HTTP/1.1
-        Host: sentv-user-action.totsuko.tv
-        Connection: keep-alive
-        Content-Length: 247
-        Accept: */*
-        reqPayload: redacted
-        User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/44.0.2403.119 Safari/537.36
-        Origin: https://themis.dl.playstation.net
-        Content-Type: application/json
-        Referer: https://themis.dl.playstation.net/themis/zartan/2.2.2b/
-        Accept-Encoding: gzip, deflate
-        Accept-Language: en-US
-        X-Requested-With: com.snei.vue.android
-
-        {"series_id":redacted,"program_id":redacted,"channel_id":redacted,"tms_id":"redacted","airing_id":redacted,"last_watch_date":"2017-04-28T00:40:43Z","last_timecode":"01:46:29","start_timecode":"00:00:00:00","fully_watched":false,"stream_type":"dvr"}
-        """
+    def put_resume_time(self, airing_id, channel_id, program_id, series_id, tms_id):
         url = self.user_action_url+'/watch_history'
         headers = {"Accept": "*/*",
                    "Content-type": "application/json",
@@ -339,17 +322,18 @@ class SONY():
                    'X-Requested-With': 'com.snei.vue.android'
                    }
 
-        payload = '{"series_id":redacted,'
-        payload += '"program_id":redacted,'
-        payload += '"channel_id":redacted,'
-        payload += '"tms_id":"redacted",'
-        payload += '"airing_id":redacted,'
-        payload += '"last_watch_date":"2017-04-28T00:40:43Z",'
-        payload += '"last_timecode":"01:46:29",'
+        payload = '{"series_id":'+series_id+','
+        payload += '"program_id":'+program_id+','
+        payload += '"channel_id":'+channel_id+','
+        payload += '"tms_id":"'+tms_id+'",'
+        payload += '"airing_id":'+airing_id+','
+        payload += '"last_watch_date":"2017-08-11T00:40:43Z",'
+        payload += '"last_timecode":"00:01:46",'
         payload += '"start_timecode":"00:00:00:00",'
         payload += '"fully_watched":false,'
         payload += '"stream_type":"dvr"}'
 
+        #xbmc.log(payload)
         r = requests.put(url, headers=headers, data=payload, verify=self.verify)
 
 

@@ -36,7 +36,9 @@ def favorite_channels():
 
 
 def live_tv():
-    json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/channel/offset/0/size/100')
+    #https://epg-service.totsuko.tv/epg_service_sony/service/v2/browse/items/channels/filter/all/sort/channeltype/offset/0/size/24
+    #json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/24')
+    json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/channel/offset/0/size/500')
     list_channels(json_source['body']['items'])
 
 
@@ -108,6 +110,11 @@ def list_show(show):
                 if image['width'] >= 1080: fanart = image['src']
                 if icon != ICON and fanart != FANART: break
         title = show['title']
+
+        airing_id = 'null'
+        if 'airing_id' in show: airing_id = str(show['airing_id'])
+        channel_id = 'null'
+        if 'channel_id' in show: channel_id = str(show['channel_id'])
         program_id = str(show['id'])
         series_id = 'null'
         if 'series_id' in show: series_id = str(show['series_id'])
@@ -130,10 +137,11 @@ def list_show(show):
         }
 
         show_info = {
+            'airing_id': airing_id,
+            'channel_id': channel_id,
             'program_id': program_id,
             'series_id': series_id,
             'tms_id': tms_id
-
         }
 
         addShow(title, 150, icon, fanart, info, show_info)
@@ -165,6 +173,16 @@ def list_episode(show):
     show_title = show['title']
     title = show['display_episode_title']
     airing_id = str(show['airings'][0]['airing_id'])
+
+    #airing_id = 'null'
+    #if 'airing_id' in show: airing_id = str(show['airings'][0]['airing_id'])
+    channel_id = 'null'
+    if 'channel_id' in show['channel']: channel_id = str(show['channel']['channel_id'])
+    program_id = str(show['id'])
+    series_id = 'null'
+    if 'series_id' in show: series_id = str(show['series_id'])
+    tms_id = str(show['tms_id'])
+
     airing_date = show['airing_date']
     airing_date = stringToDate(airing_date, "%Y-%m-%dT%H:%M:%S.%fZ")
     airing_enddate = str(show['airings'][0]['airing_enddate'])
@@ -199,8 +217,8 @@ def list_episode(show):
         h,m,s = resumetime.split(':')
         resumetime = str(int(h) * 3600 + int(m) * 60 + int(s))
     except: pass
-    xbmc.log("RESUME TIME IN Seconds = "+resumetime)
-    xbmc.log("TOTAL TIME IN Seconds = "+str(int(duration.total_seconds())))
+    #xbmc.log("RESUME TIME IN Seconds = "+resumetime)
+    #xbmc.log("TOTAL TIME IN Seconds = "+str(int(duration.total_seconds())))
 
     show_url = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/' + airing_id
 
@@ -223,9 +241,16 @@ def list_episode(show):
         'IsPlayable': str(show['playable']).lower()
     }
 
+    show_info = {
+        'airing_id': airing_id,
+        'channel_id': channel_id,
+        'program_id': program_id,
+        'series_id': series_id,
+        'tms_id': tms_id
+    }
 
 
-    addStream(title, show_url, title, icon, fanart, info, properties)
+    addStream(title, show_url, title, icon, fanart, info, properties, show_info)
 
 
 def list_channels(json_source):
@@ -260,7 +285,15 @@ def list_channel(channel):
 
         channel_url = CHANNEL_URL + '/' + channel_id
 
-        info = {'season':season, 'episode':episode, 'plot': plot, 'tvshowtitle': title, 'title': title, 'originaltitle': title, 'genre': genre}
+        info = {
+            'season':season,
+            'episode':episode,
+            'plot': plot,
+            'tvshowtitle': title,
+            'title': title,
+            'originaltitle': title,
+            'genre': genre
+        }
 
         addStream(title, channel_url, title, icon, fanart, info)
 
@@ -272,7 +305,7 @@ def get_dict_item(key, dictionary):
         return ''
 
 
-def get_stream(url):
+def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
     headers = {"Accept": "*/*",
                "Content-type": "application/x-www-form-urlencoded",
                "Origin": "https://vue.playstation.com",
@@ -299,16 +332,19 @@ def get_stream(url):
 
     # Seek to time
 
+    #Give the stream sometime to start before checking
+    '''
     monitor = xbmc.Monitor()
     monitor.waitForAbort(10)
     xbmc.log("Is playing video? " + str(xbmc.Player().isPlayingVideo()))
     while xbmc.Player().isPlayingVideo() and not monitor.abortRequested():
         xbmc.log("Still playing...")
-        monitor.waitForAbort(5)
+        monitor.waitForAbort(3)
 
     xbmc.log("We're done, write info back to ps servers!!!")
     sony = SONY()
-    sony.put_resume_time()
+    sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id)
+    '''
 
 
 
@@ -417,7 +453,7 @@ def addShow(name, mode, icon, fanart, info, show_info):
     xbmcplugin.setContent(addon_handle, 'tvshows')
 
 
-def addStream(name, link_url, title, icon, fanart, info=None, properties=None):
+def addStream(name, link_url, title, icon, fanart, info=None, properties=None, show_info=None):
     u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url) + "&mode=" + str(900)
     xbmc.log(str(info))
     liz = xbmcgui.ListItem(name)
@@ -426,6 +462,11 @@ def addStream(name, link_url, title, icon, fanart, info=None, properties=None):
     if properties != None:
         for key, value in properties.iteritems():
             liz.setProperty(key,value)
+    if show_info != None:
+        show_values =''
+        for key, value in show_info.iteritems():
+            show_values += '&' + key + '=' + value
+        u += show_values
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
