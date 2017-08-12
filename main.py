@@ -43,6 +43,9 @@ if mode == None and mode < 998:
     if ADDON.getSetting(id='default_profile') == '' or ADDON.getSetting(id='always_ask_profile') == 'true': sony.get_profiles()
     main_menu()
 
+elif mode == 30:
+    all_channels()
+
 elif mode == 50:
     timeline()
 
@@ -77,7 +80,7 @@ elif mode == 800:
     sony.get_profiles()
     main_menu()
 
-elif mode == 900:    
+elif mode == 900:
     get_stream(url, airing_id, channel_id, program_id, series_id, tms_id)
 
 elif mode == 998:
@@ -94,10 +97,22 @@ elif mode == 1000:
     sony.notification_msg(LOCAL_STRING(30006), LOCAL_STRING(30007))
 
 elif mode == 1001:
-    sony.add_to_myshows(program_id, series_id, tms_id)
+    ids ={
+        'channel_id': channel_id,
+        'program_id': program_id,
+        'series_id': series_id,
+        'tms_id': tms_id
+    }
+    sony.add_to_favorites(ids)
 
 elif mode == 1002:
-    sony.remove_from_myshows(program_id, series_id, tms_id)
+    ids ={
+        'channel_id': channel_id,
+        'program_id': program_id,
+        'series_id': series_id,
+        'tms_id': tms_id
+    }
+    sony.remove_from_favorites(ids)
 
 
 if mode != None and mode != 800 and mode != 750:

@@ -262,7 +262,7 @@ class SONY():
         self.addon.setSetting(id='default_profile', value=profile_id)
 
 
-    def add_to_myshows(self, program_id, series_id, tms_id):
+    def add_to_favorites(self, ids):
         url = self.user_action_url+'/favorite'
         headers = {"Accept": "*/*",
                    "Content-type": "application/json",
@@ -275,18 +275,22 @@ class SONY():
                    "reqPayload": self.addon.getSetting(id='reqPayload')
                    }
 
-        payload = '{"program_id":'+program_id+',"series_id":'+series_id+',"tms_id":"'+tms_id+'"}'
+        if ids['channel_id'] != 'null':
+            location = self.addon.getLocalizedString(30102)
+            payload = '{"channel_id":'+ids['channel_id']+'}'
+        else:
+            location = self.addon.getLocalizedString(30101)
+            payload = '{"program_id":'+ids['program_id']+',"series_id":'+ids['series_id']+',"tms_id":"'+ids['tms_id']+'"}'
+
         r = requests.post(url, headers=headers, cookies=self.load_cookies(), data=payload, verify=self.verify)
 
         if r.status_code == 200:
-            self.notification_msg("Success!", "Added to favorites")
+            self.notification_msg("Success!", "Added to "+location)
         else:
-            self.notification_msg("Fail!", "Not added")
+            self.notification_msg("Fail", "Not added")
 
 
-    def remove_from_myshows(self, program_id, series_id, tms_id):
-        dialog = xbmcgui.Dialog()
-        ret = dialog.yesno('Remove Show', 'Are you sure you want to remove this from My Shows?')
+    def remove_from_favorites(self,ids):
         url = self.user_action_url+'/favorite'
         headers = {"Accept": "*/*",
                    "Content-type": "application/json",
@@ -299,13 +303,23 @@ class SONY():
                    "reqPayload": self.addon.getSetting(id='reqPayload')
                    }
 
-        payload = '{"program_id":'+program_id+',"series_id":'+series_id+',"tms_id":"'+tms_id+'"}'
-        r = requests.delete(url, headers=headers, cookies=self.load_cookies(), data=payload, verify=self.verify)
-
-        if r.status_code == 200:
-            self.notification_msg("Success!", "Added to favorites")
+        if ids['channel_id'] != 'null':
+            location = self.addon.getLocalizedString(30102)
+            payload = '{"channel_id":'+ids['channel_id']+'}'
         else:
-            self.notification_msg("Fail!", "Not added")
+            location = self.addon.getLocalizedString(30101)
+            payload = '{"program_id":'+ids['program_id']+',"series_id":'+ids['series_id']+',"tms_id":"'+ids['tms_id']+'"}'
+
+        msg = 'Are you sure you want to remove this from '+location+'?'
+        dialog = xbmcgui.Dialog()
+        remove = dialog.yesno(location,msg)
+        if remove:
+            r = requests.delete(url, headers=headers, cookies=self.load_cookies(), data=payload, verify=self.verify)
+
+            if r.status_code == 200:
+                self.notification_msg("Success!", "Removed from "+location)
+            else:
+                self.notification_msg("Fail", "Not added")
 
 
     def put_resume_time(self, airing_id, channel_id, program_id, series_id, tms_id):

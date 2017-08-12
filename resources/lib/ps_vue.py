@@ -10,6 +10,7 @@ from sony import SONY
 
 
 def main_menu():
+    if ADDON.getSetting(id='all_chan_visible') == 'true': addDir(LOCAL_STRING(30224), 30, ICON)
     if ADDON.getSetting(id='timeline_visible') == 'true': addDir(LOCAL_STRING(30100), 50, ICON)
     if ADDON.getSetting(id='myshows_visible') == 'true': addDir(LOCAL_STRING(30101), 100, ICON)
     if ADDON.getSetting(id='fav_visible') == 'true': addDir(LOCAL_STRING(30102), 200, ICON)
@@ -21,23 +22,26 @@ def main_menu():
     if ADDON.getSetting(id='search_visible') == 'true': addDir(LOCAL_STRING(30211), 750, ICON)
 
 
+def all_channels():
+    json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/500')
+    list_channels(json_source['body']['items'])
+
+
 def timeline():
     list_timeline()
 
 
 def my_shows():
-    json_source = get_json(EPG_URL + '/browse/items/favorites/filter/shows/sort/title/offset/0/size/100')
+    json_source = get_json(EPG_URL + '/browse/items/favorites/filter/shows/sort/title/offset/0/size/500')
     list_shows(json_source['body']['items'])
 
 
 def favorite_channels():
-    json_source = get_json(EPG_URL + '/browse/items/favorites/filter/channels/sort/name/offset/0/size/100')
+    json_source = get_json(EPG_URL + '/browse/items/favorites/filter/channels/sort/name/offset/0/size/500')
     list_channels(json_source['body']['items'])
 
 
 def live_tv():
-    #https://epg-service.totsuko.tv/epg_service_sony/service/v2/browse/items/channels/filter/all/sort/channeltype/offset/0/size/24
-    #json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/24')
     json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/channel/offset/0/size/500')
     list_channels(json_source['body']['items'])
 
@@ -249,7 +253,6 @@ def list_episode(show):
         'tms_id': tms_id
     }
 
-
     addStream(title, show_url, title, icon, fanart, info, properties, show_info)
 
 
@@ -295,7 +298,15 @@ def list_channel(channel):
             'genre': genre
         }
 
-        addStream(title, channel_url, title, icon, fanart, info)
+        properties = {
+            'IsPlayable': 'true'
+        }
+
+        show_info = {
+            'channel_id': channel_id
+        }
+
+        addStream(title, channel_url, title, icon, fanart, info, properties, show_info)
 
 
 def get_dict_item(key, dictionary):
@@ -447,7 +458,8 @@ def addShow(name, mode, icon, fanart, info, show_info):
     for key, value in show_info.iteritems():
         show_values += '&' + key + '=' + value
 
-    context_items = [('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001'+show_values+')'),('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002'+show_values+')')]
+    context_items = [('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001'+show_values+')'),
+                    ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002'+show_values+')')]
     liz.addContextMenuItems(context_items)
     ok = xbmcplugin.addDirectoryItem(handle=addon_handle, url=u, listitem=liz, isFolder=True)
     xbmcplugin.setContent(addon_handle, 'tvshows')
@@ -455,18 +467,24 @@ def addShow(name, mode, icon, fanart, info, show_info):
 
 def addStream(name, link_url, title, icon, fanart, info=None, properties=None, show_info=None):
     u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url) + "&mode=" + str(900)
-    xbmc.log(str(info))
+    #xbmc.log(str(info))
     liz = xbmcgui.ListItem(name)
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
     if info != None: liz.setInfo(type="Video", infoLabels=info)
     if properties != None:
         for key, value in properties.iteritems():
             liz.setProperty(key,value)
+    xbmc.log(str(show_info))
     if show_info != None:
         show_values =''
         for key, value in show_info.iteritems():
             show_values += '&' + key + '=' + value
         u += show_values
+        if len(show_info) == 1:
+            #Only add this option for channels not episodes
+            context_items = [('Add To Favorites', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001'+show_values+')'),
+                            ('Remove From Favorites', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002'+show_values+')')]
+            liz.addContextMenuItems(context_items)
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
