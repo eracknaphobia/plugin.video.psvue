@@ -61,6 +61,9 @@ elif mode == 200:
 elif mode == 300:
     live_tv()
 
+elif mode == 350:
+    on_demand(channel_id)
+
 elif mode == 400:
     sports()
 
