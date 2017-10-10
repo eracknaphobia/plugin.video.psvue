@@ -334,9 +334,10 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
                "Accept-Language": "en-US,en;q=0.8",
                "Referer": "https://vue.playstation.com/watch/live",
                "Accept-Encoding": "deflate",
-               "User-Agent": UA_ANDROID,
+               "User-Agent": UA_ANDROID_TV,
                "Connection": "Keep-Alive",
-               'reqPayload': ADDON.getSetting(id='reqPayload')
+               'reqPayload': ADDON.getSetting(id='reqPayload'),
+               "X-Requested-With": "com.snei.vue.atv"
                }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
@@ -383,7 +384,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
 def get_json(url):
     headers = {'Accept': '*/*',
                'reqPayload': ADDON.getSetting(id='reqPayload'),
-               'User-Agent': UA_ANDROID,
+               'User-Agent': UA_ANDROID_TV,
                'Accept-Encoding': 'gzip, deflate',
                'Accept-Language': 'en-US',
                'X-Requested-With': 'com.snei.vue.android'
@@ -545,7 +546,6 @@ def check_device_id():
         DEVICE_ID = ADDON.getSetting(id='deviceId')
 
 
-
 addon_handle = int(sys.argv[1])
 ADDON = xbmcaddon.Addon()
 ROOTDIR = ADDON.getAddonInfo('path')
@@ -555,6 +555,7 @@ ICON = os.path.join(ROOTDIR, "resources", "icon.png")
 
 ADDON_PATH_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
 UA_ANDROID = 'Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/44.0.2403.119 Safari/537.36'
+UA_ANDROID_TV = 'Mozilla/5.0 (Linux; Android 6.0.1; Hub Build/MHC19J; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Safari/537.36'
 CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/channel'
 EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'
-VERIFY = False
+VERIFY = True
