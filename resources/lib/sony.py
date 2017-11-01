@@ -210,12 +210,23 @@ class SONY():
             'Accept-Encoding': 'gzip',
             "X-Requested-With": "com.snei.vue.atv"
         }
+        r = requests.get(url, headers=headers, verify=self.verify)
+        device_status = str(r.json()['body']['status'])
+        
         if self.addon.getSetting(id='reqPayload') != '':
             headers['reauth'] = '1'
             headers['reqPayload'] = self.addon.getSetting(id='reqPayload')
+                                
+        if device_status == "UNAUTHORIZED":
+            auth_error = r.json()['header']['error']['message']
+            error_code = r.json()['header']['error']['code']
+            self.addon.setSetting(id='auth_error', value=auth_error)
+            self.addon.setSetting(id='error_code', value=error_code)
+            self.notification_msg(auth_error, "Error code: "+error_code)
+            sys.exit()
 
-        r = requests.get(url, headers=headers, verify=self.verify)
-        if 'reqPayload' in r.headers:
+        
+        elif 'reqPayload' in r.headers:
             req_payload = str(r.headers['reqPayload'])
             self.addon.setSetting(id='reqPayload', value=req_payload)
             auth_time = r.json()['header']['time_stamp']
