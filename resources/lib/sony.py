@@ -218,11 +218,9 @@ class SONY():
             headers['reqPayload'] = self.addon.getSetting(id='reqPayload')
                                 
         if device_status == "UNAUTHORIZED":
-            auth_error = r.json()['header']['error']['message']
-            error_code = r.json()['header']['error']['code']
-            self.addon.setSetting(id='auth_error', value=auth_error)
-            self.addon.setSetting(id='error_code', value=error_code)
-            self.notification_msg(auth_error, "Error code: "+error_code)
+            auth_error = str(r.json()['header']['error']['message'])
+            error_code = str(r.json()['header']['error']['code'])
+            self.notification_msg("Error Code: "+error_code, auth_error)
             sys.exit()
 
         
