@@ -21,7 +21,6 @@ def main_menu():
     if ADDON.getSetting(id='featured_visible') == 'true': addDir(LOCAL_STRING(30107), 700, ICON)
     if ADDON.getSetting(id='search_visible') == 'true': addDir(LOCAL_STRING(30211), 750, ICON)
 
-
 def all_channels():
     json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/500')
     list_channels(json_source['body']['items'])
@@ -79,14 +78,30 @@ def search():
 
 
 def list_timeline():
-    url = 'https://sentv-user-ext.totsuko.tv/sentv_user_ext/ws/v2/profile/ids'
-    json_source = get_json(url)
-    try:
-        airing_id = json_source['body']['launch_program']['airing_id']
-    except:
+    url = 'https://sentv-user-ext.totsuko.tv/sentv_user_ext/ws/v2/profile/'
+    
+    json_source = get_json(url + PROF_ID)
+    
+    if 'body' in json_source and 'watch_history' in json_source['body']:
+        watch_history = json_source['body']['watch_history']
+        air_dict = {}
+        air_list = []
+        for airing in watch_history:
+            xbmc.log(str(airing['airing_id']) + ' ' + str(airing['last_watch_date']))
+            air_dict[str(airing['last_watch_date'])] = str(airing['airing_id'])
+            air_list.append(str(airing['last_watch_date']))
+    
+        dialog = xbmcgui.Dialog()
+        ret = dialog.select(LOCAL_STRING(30214), air_list)
+        if ret >= 0:
+            air_dict[air_list[ret]]
+        else:
+            sys.exit()
+    else:
+        dialog.notification('No airing ID found', msg, xbmcgui.NOTIFICATION_INFO, 5000)
         sys.exit()
 
-    json_source = get_json(EPG_URL + '/timeline/' + str(airing_id))
+    json_source = get_json(EPG_URL + '/timeline/' + air_dict[air_list[ret]])
 
     for strand in json_source['body']['strands']:
        if strand['id'] == 'now_playing':
@@ -558,4 +573,5 @@ UA_ANDROID = 'Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/5
 UA_ANDROID_TV = 'Mozilla/5.0 (Linux; Android 6.0.1; Hub Build/MHC19J; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Safari/537.36'
 CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/channel'
 EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'
+PROF_ID = ADDON.getSetting(id='default_profile')
 VERIFY = True
