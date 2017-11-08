@@ -90,13 +90,9 @@ def list_timeline():
             xbmc.log(str(airing['airing_id']) + ' ' + str(airing['last_watch_date']))
             air_dict[str(airing['last_watch_date'])] = str(airing['airing_id'])
             air_list.append(str(airing['last_watch_date']))
-    
-        dialog = xbmcgui.Dialog()
-        ret = dialog.select(LOCAL_STRING(30214), air_list)
-        if ret >= 0:
-            air_dict[air_list[ret]]
-        else:
-            sys.exit()
+   
+        ret = 0
+        
     else:
         dialog.notification('No airing ID found', msg, xbmcgui.NOTIFICATION_INFO, 5000)
         sys.exit()
