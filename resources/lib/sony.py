@@ -353,15 +353,16 @@ class SONY():
 
     def put_resume_(self, airing_id, channel_id, program_id, series_id, tms_id):
         url = self.user_action_url+'/watch_history'
-        headers = {"Accept": "*/*",
-                   "Content-type": "application/json",
-                   "Origin": "https://vue.playstation.com",
-                   "Accept-Language": "en-US",
-                   "Referer": "https://vue.playstation.com/watch/live",
-                   "Accept-Encoding": "gzip, deflate",
-                   "User-Agent": self.ua_android_tv,
-                   "Connection": "Keep-Alive",
-                   'reqPayload': self.addon.getSetting(id='reqPayload'),
+        headers = {'Accept': '*/*',
+                   'Content-type': 'application/json',
+                   'Origin': 'https://vue.playstation.com',
+                   'Accept-Language': 'en-US',
+                   'Referer': 'https://vue.playstation.com/watch/live',
+                   'Accept-Encoding': 'gzip, deflate',
+                   'User-Agent': self.ua_android_tv,
+                   'Connection': 'Keep-Alive',
+                   'Host': 'sentv-user-action.totsuko.tv',
+                   'reqPayload': self.addon.getSetting(id='EPGreqPayload'),
                    'X-Requested-With': 'com.snei.vue.atv'
                    }
 

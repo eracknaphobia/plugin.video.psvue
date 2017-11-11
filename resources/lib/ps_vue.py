@@ -338,15 +338,15 @@ def get_dict_item(key, dictionary):
 
 
 def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
-    headers = {"Accept": "*/*",
-               "Content-type": "application/x-www-form-urlencoded",
-               "Origin": "https://vue.playstation.com",
-               "Accept-Language": "en-US,en;q=0.8",
-               "Referer": "https://vue.playstation.com/watch/live",
-               "Accept-Encoding": "deflate",
-               "User-Agent": UA_ANDROID_TV,
-               "Connection": "Keep-Alive",
-               'reqPayload': ADDON.getSetting(id='reqPayload'),
+    headers = {'Accept': '*/*',
+               'Content-type': 'application/x-www-form-urlencoded',
+               'Origin': 'https://vue.playstation.com',
+               'Accept-Language': 'en-US,en;q=0.8',
+               'Referer': 'https://vue.playstation.com/watch/live',
+               'Accept-Encoding': 'deflate',
+               'User-Agent': UA_ANDROID_TV,
+               'Connection': 'Keep-Alive',
+               'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
                'X-Requested-With': 'com.snei.vue.atv'
                }
 
@@ -355,7 +355,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
     stream_url = json_source['body']['video']
     headers = '|User-Agent='
     headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
-    headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='reqPayload') + '"')
+    headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
     listitem = xbmcgui.ListItem()
     listitem.setMimeType("application/x-mpegURL")
 
