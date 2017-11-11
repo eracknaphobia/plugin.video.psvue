@@ -138,7 +138,7 @@ msgid "Always Ask Profile"
 msgstr ""
 
 msgctxt "#30214"
-msgid "Timeline"
+msgid "Choose Date"
 msgstr ""
 
 msgctxt "#30215"
