@@ -90,13 +90,12 @@ def list_timeline():
             xbmc.log(str(airing['airing_id']) + ' ' + str(airing['last_watch_date']))
             air_dict[str(airing['last_watch_date'])] = str(airing['airing_id'])
             air_list.append(str(airing['last_watch_date']))
-   
-        ret = 0
-        
+
     else:
         dialog.notification('No airing ID found', msg, xbmcgui.NOTIFICATION_INFO, 5000)
         sys.exit()
 
+    ret = 0
     json_source = get_json(EPG_URL + '/timeline/' + air_dict[air_list[ret]])
 
     for strand in json_source['body']['strands']:
@@ -348,7 +347,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
                "User-Agent": UA_ANDROID_TV,
                "Connection": "Keep-Alive",
                'reqPayload': ADDON.getSetting(id='reqPayload'),
-               "X-Requested-With": "com.snei.vue.atv"
+               'X-Requested-With': 'com.snei.vue.atv'
                }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
@@ -390,15 +389,14 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
     sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id)
     '''
 
-
-
 def get_json(url):
     headers = {'Accept': '*/*',
-               'reqPayload': ADDON.getSetting(id='reqPayload'),
+               'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
                'User-Agent': UA_ANDROID_TV,
-               'Accept-Encoding': 'gzip, deflate',
-               'Accept-Language': 'en-US',
-               'X-Requested-With': 'com.snei.vue.android'
+               'Accept-Encoding': 'gzip, deflate, br',
+               'Accept-Language': 'en-US,en;q=0.5',
+               'X-Requested-With': 'com.snei.vue.android',
+               'Connection': 'keep-alive'
                }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
@@ -411,7 +409,7 @@ def get_json(url):
             msg = json_source['header']['error']['message']
         except:
             pass
-        dialog.notification('Error '+str(r.status_code), msg, xbmcgui.NOTIFICATION_INFO, 5000)
+        dialog.notification('Error '+str(r.status_code), msg, xbmcgui.NOTIFICATION_INFO, 9000)
         sys.exit()
 
     return r.json()
