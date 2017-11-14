@@ -351,19 +351,19 @@ class SONY():
                 self.notification_msg("Fail", "Not added")
 
 
-    def put_resume_(self, airing_id, channel_id, program_id, series_id, tms_id):
+    def put_resume_time(self, airing_id, channel_id, program_id, series_id, tms_id):
         url = self.user_action_url+'/watch_history'
         headers = {'Accept': '*/*',
                    'Content-type': 'application/json',
                    'Origin': 'https://vue.playstation.com',
-                   'Accept-Language': 'en-US',
-                   'Referer': 'https://vue.playstation.com/watch/live',
-                   'Accept-Encoding': 'gzip, deflate',
+                   'Accept-Language': 'en-US,en;q-0.5',
+                   'Referer': 'https://vue.playstation.com/watch/my-vue',
+                   'Accept-Encoding': 'gzip, deflate, br',
                    'User-Agent': self.ua_android_tv,
                    'Connection': 'Keep-Alive',
                    'Host': 'sentv-user-action.totsuko.tv',
                    'reqPayload': self.addon.getSetting(id='EPGreqPayload'),
-                   'X-Requested-With': 'com.snei.vue.atv'
+                   'X-Requested-With': 'com.snei.vue.android'
                    }
 
         payload = '{"series_id":'+series_id+','
@@ -371,13 +371,13 @@ class SONY():
         payload += '"channel_id":'+channel_id+','
         payload += '"tms_id":"'+tms_id+'",'
         payload += '"airing_id":'+airing_id+','
-        payload += '"last_watch_date":"2017-08-11T00:40:43Z",'
-        payload += '"last_timecode":"00:01:46",'
+        payload += '"last_watch_date":"2017-11-13T06:54:419Z",'
+        payload += '"last_timecode":"00:00:10",'
         payload += '"start_timecode":"00:00:00:00",'
         payload += '"fully_watched":false,'
-        payload += '"stream_type":"dvr"}'
+        payload += '"stream_type":"null"}'
 
-        #xbmc.log(payload)
+        #xbmc.log("The Payload is: " + payload)
         r = requests.put(url, headers=headers, data=payload, verify=self.verify)
 
 
@@ -412,4 +412,4 @@ class SONY():
 
     def notification_msg(self, title, msg):
         dialog = xbmcgui.Dialog()
-        dialog.notification(title, msg, xbmcgui.NOTIFICATION_INFO, 5000)
+        dialog.notification(title, msg, xbmcgui.NOTIFICATION_INFO, 9000)
