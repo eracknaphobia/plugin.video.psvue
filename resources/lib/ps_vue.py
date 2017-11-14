@@ -21,7 +21,6 @@ def main_menu():
     if ADDON.getSetting(id='featured_visible') == 'true': addDir(LOCAL_STRING(30107), 700, ICON)
     if ADDON.getSetting(id='search_visible') == 'true': addDir(LOCAL_STRING(30211), 750, ICON)
 
-
 def all_channels():
     json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/500')
     list_channels(json_source['body']['items'])
@@ -79,20 +78,29 @@ def search():
 
 
 def list_timeline():
-    url = 'https://sentv-user-ext.totsuko.tv/sentv_user_ext/ws/v2/profile/ids'
-    json_source = get_json(url)
-    try:
-        airing_id = json_source['body']['launch_program']['airing_id']
-    except:
+    url = 'https://sentv-user-ext.totsuko.tv/sentv_user_ext/ws/v2/profile/'
+    
+    json_source = get_json(url + PROF_ID)
+    
+    if 'body' in json_source and 'watch_history' in json_source['body']:
+        watch_history = json_source['body']['watch_history']
+        air_dict = {}
+        air_list = []
+        for airing in watch_history:
+            xbmc.log(str(airing['airing_id']) + ' ' + str(airing['last_watch_date']))
+            air_dict[str(airing['last_watch_date'])] = str(airing['airing_id'])
+            air_list.append(str(airing['last_watch_date']))
+
+    else:
+        dialog.notification('No airing ID found', msg, xbmcgui.NOTIFICATION_INFO, 5000)
         sys.exit()
 
-    json_source = get_json(EPG_URL + '/timeline/' + str(airing_id))
+    json_source = get_json(EPG_URL + '/timeline/' + air_dict[air_list[0]])
 
     for strand in json_source['body']['strands']:
        if strand['id'] == 'now_playing':
            addDir('[B][I][COLOR=FFFFFF66]Now Playing[/COLOR][/B][/I]', 998, ICON)
            for program in strand['programs']:
-               #list_channel(program)
                 list_episode(program)
        elif strand['id'] == 'watched_episodes':
            addDir('[B][I][COLOR=FFFFFF66]Watched Episodes[/COLOR][/B][/I]', 998, ICON)
@@ -120,9 +128,9 @@ def list_show(show):
         title = show['title']
 
         airing_id = 'null'
-        if 'airing_id' in show: airing_id = str(show['airing_id'])
+        if 'airing_id' in show: airing_id = str(show['airings']['airing_id'])
         channel_id = 'null'
-        if 'channel_id' in show: channel_id = str(show['channel_id'])
+        if 'channel_id' in show: channel_id = str(show['airings']['channel_id'])
         program_id = str(show['id'])
         series_id = 'null'
         if 'series_id' in show: series_id = str(show['series_id'])
@@ -273,14 +281,30 @@ def list_channel(channel):
                 if image['width'] == 600 or image['width'] == 440: icon = image['src']
                 if image['width'] == 1920: fanart = image['src']
                 if icon != ICON and fanart != FANART: break
+        
+        airing_id = ''
+        if 'id' in channel and 'airings' in channel['sub_item']:
+            AID = channel['sub_item']['airings']
+            air_dict = {}
+            air_list = []
+            for airing in AID:
+                xbmc.log(str(airing['airing_id']) + ' ' + str(airing['type']))
+                air_dict[str(airing['type'])] = str(airing['airing_id'])
+                air_list.append(str(airing['type']))
+        airing_id = air_dict[air_list[0]]
 
+        program_id = ''
+        if 'id' in channel['sub_item']: program_id = str(channel['sub_item']['id'])
+        series_id = ''
+        if 'series_id' in channel['sub_item']: series_id = str(channel['sub_item']['series_id'])
+        tms_id = str(channel['sub_item']['tms_id'])
+                                    
         if 'channel' in channel:
             title = channel['channel']['name']
             channel_id = str(channel['channel']['channel_id'])
         else:
             title = channel['title']
             channel_id = str(channel['id'])
-
 
         genre = ''
         for item in channel['genres']:
@@ -308,7 +332,11 @@ def list_channel(channel):
         }
 
         show_info = {
-            'channel_id': channel_id
+            'airing_id': airing_id,
+            'channel_id': channel_id,
+            'program_id': program_id,
+            'series_id': series_id,
+            'tms_id': tms_id
         }
 
         if 'channel_type' in channel:
@@ -328,16 +356,17 @@ def get_dict_item(key, dictionary):
 
 
 def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
-    headers = {"Accept": "*/*",
-               "Content-type": "application/x-www-form-urlencoded",
-               "Origin": "https://vue.playstation.com",
-               "Accept-Language": "en-US,en;q=0.8",
-               "Referer": "https://vue.playstation.com/watch/live",
-               "Accept-Encoding": "deflate",
-               "User-Agent": UA_ANDROID_TV,
-               "Connection": "Keep-Alive",
-               'reqPayload': ADDON.getSetting(id='reqPayload'),
-               "X-Requested-With": "com.snei.vue.atv"
+    headers = {'Accept': '*/*',
+               'Content-type': 'application/x-www-form-urlencoded',
+               'Origin': 'https://vue.playstation.com',
+               'Accept-Language': 'en-US,en;q=0.8',
+               'Referer': 'https://vue.playstation.com/watch/live',
+               'Accept-Encoding': 'gzip, deflate, br',
+               'User-Agent': UA_ANDROID_TV,
+               'Connection': 'Keep-Alive',
+               'Host': 'media-framework.totsuko.tv',
+               'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
+               'X-Requested-With': 'com.snei.vue.android'
                }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
@@ -345,7 +374,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
     stream_url = json_source['body']['video']
     headers = '|User-Agent='
     headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
-    headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='reqPayload') + '"')
+    headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
     listitem = xbmcgui.ListItem()
     listitem.setMimeType("application/x-mpegURL")
 
@@ -354,19 +383,17 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)
         listitem.setProperty('inputstream.adaptive.license_key', headers)
+
     else:
         stream_url += headers
 
-
     listitem.setPath(stream_url)
 
-
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
-
     # Seek to time
 
     #Give the stream sometime to start before checking
-    '''
+    
     monitor = xbmc.Monitor()
     monitor.waitForAbort(10)
     xbmc.log("Is playing video? " + str(xbmc.Player().isPlayingVideo()))
@@ -377,17 +404,16 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id):
     xbmc.log("We're done, write info back to ps servers!!!")
     sony = SONY()
     sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id)
-    '''
-
 
 
 def get_json(url):
     headers = {'Accept': '*/*',
-               'reqPayload': ADDON.getSetting(id='reqPayload'),
+               'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
                'User-Agent': UA_ANDROID_TV,
-               'Accept-Encoding': 'gzip, deflate',
-               'Accept-Language': 'en-US',
-               'X-Requested-With': 'com.snei.vue.android'
+               'Accept-Encoding': 'gzip, deflate, br',
+               'Accept-Language': 'en-US,en;q=0.5',
+               'X-Requested-With': 'com.snei.vue.android',
+               'Connection': 'keep-alive'
                }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
@@ -400,7 +426,7 @@ def get_json(url):
             msg = json_source['header']['error']['message']
         except:
             pass
-        dialog.notification('Error '+str(r.status_code), msg, xbmcgui.NOTIFICATION_INFO, 5000)
+        dialog.notification('Error '+str(r.status_code), msg, xbmcgui.NOTIFICATION_INFO, 9000)
         sys.exit()
 
     return r.json()
@@ -545,7 +571,7 @@ def check_device_id():
         create_device_id()
         DEVICE_ID = ADDON.getSetting(id='deviceId')
 
-
+        
 addon_handle = int(sys.argv[1])
 ADDON = xbmcaddon.Addon()
 ROOTDIR = ADDON.getAddonInfo('path')
@@ -558,4 +584,5 @@ UA_ANDROID = 'Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/5
 UA_ANDROID_TV = 'Mozilla/5.0 (Linux; Android 6.0.1; Hub Build/MHC19J; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Safari/537.36'
 CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/channel'
 EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'
+PROF_ID = ADDON.getSetting(id='default_profile')
 VERIFY = True
