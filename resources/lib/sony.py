@@ -372,7 +372,7 @@ class SONY():
         payload += '"tms_id":"'+tms_id+'",'
         payload += '"airing_id":'+airing_id+','
         payload += '"last_watch_date":"2017-11-13T06:54:419Z",'
-        payload += '"last_timecode":"00:00:10",'
+        payload += '"last_timecode":"00:00:00",'
         payload += '"start_timecode":"00:00:00:00",'
         payload += '"fully_watched":false,'
         payload += '"stream_type":"null"}'
