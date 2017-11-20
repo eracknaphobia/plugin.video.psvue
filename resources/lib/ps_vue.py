@@ -42,7 +42,7 @@ def favorite_channels():
 
 def live_tv():
     json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/channel/offset/0/size/500')
-    list_channels(json_source['body']['items'])
+    list_shows(json_source['body']['items'])
 
 def on_demand(channel_id):
     json_source = get_json(EPG_URL + '/details/channel/'+channel_id+'/popular/offset/0/size/500')
@@ -92,7 +92,7 @@ def list_timeline():
             air_list.append(str(airing['last_watch_date']))
 
     else:
-        dialog.notification('No airing ID found', msg, xbmcgui.NOTIFICATION_INFO, 5000)
+        dialog.notification('No airing ID found', msg, xbmcgui.NOTIFICATION_INFO, 9000)
         sys.exit()
 
     json_source = get_json(EPG_URL + '/timeline/' + air_dict[air_list[0]])
@@ -107,7 +107,7 @@ def list_timeline():
            for program in reversed(strand['programs']):
                list_episode(program)
        elif strand['id'] == 'coming_up':
-           addDir('[B][I][COLOR=FFFFFF66]Coming Up[/COLOR][/B][/I]', 998, ICON)
+           addDir('[B][I][COLOR=FFFFFF66]Coming Up On Channel:[/COLOR][/B][/I]'+'      '+strand['programs'][0]['channel']['name_short'], 998, ICON)
            for program in strand['programs']:
                list_episode(program)
 
@@ -189,14 +189,16 @@ def list_episode(show):
     show_title = show['title']
     title = show['display_episode_title']
     airing_id = str(show['airings'][0]['airing_id'])
+    channel_name = str(show['channel']['name'])
 
-    #airing_id = 'null'
-    #if 'airing_id' in show: airing_id = str(show['airings'][0]['airing_id'])
     channel_id = 'null'
     if 'channel_id' in show['channel']: channel_id = str(show['channel']['channel_id'])
+
     program_id = str(show['id'])
+
     series_id = 'null'
     if 'series_id' in show: series_id = str(show['series_id'])
+
     tms_id = str(show['tms_id'])
 
     airing_date = show['airing_date']
@@ -222,8 +224,20 @@ def list_episode(show):
     plot = get_dict_item('synopsis', show)
 
     if str(show['playable']).upper() == 'FALSE':
-        # Add airing date/time to title
-        title = title + ' ' +  airing_date.strftime('%m/%d/%y') + ' ' + airing_date.strftime('%I:%M %p').lstrip('0')
+        # Add airing date/time to title for upcoming shows
+        title = title + '    ' + '[B][I][COLOR=FFFFFF66]Available On[/COLOR][/I][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '  @' + airing_date.strftime('%I:%M %p').lstrip('0')
+
+        # Sort Live shows and episodes no longer available to watch
+    if str(show['airings'][0]['badge']) == 'live':
+        title = title + '    ' + '[B][I][COLOR=FFFFFF66]Live Episode[/COLOR][/I][/B]'
+        channel_name = channel_name + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
+
+    elif str(show['airings'][0]['badge']) == 'no_longer_available':
+        title = title + '     ' + '[B][I][COLOR=FFde0000]Episode Not Available[/COLOR][/I][/B]'
+
+    else:
+        channel_name = show['title'] + '     ' + '[B][I][COLOR=FFFFFF66]On Demand[/COLOR][/I][/B]'
+        show_title = show['display_episode_title']
 
     # Add resumetime if applicable
     resumetime=''
@@ -241,7 +255,7 @@ def list_episode(show):
     info = {
         'plot': plot,
         'tvshowtitle': show_title,
-        'title': title,
+        'title': channel_name,
         'originaltitle': title,
         'mediatype': 'episode',
         'genre': genre,
@@ -298,7 +312,8 @@ def list_channel(channel):
         series_id = ''
         if 'series_id' in channel['sub_item']: series_id = str(channel['sub_item']['series_id'])
         tms_id = str(channel['sub_item']['tms_id'])
-                                    
+        tvshowtitle = str(channel['sub_item']['title'])
+
         if 'channel' in channel:
             title = channel['channel']['name']
             channel_id = str(channel['channel']['channel_id'])
@@ -311,9 +326,9 @@ def list_channel(channel):
             if genre != '': genre += ', '
             genre += item['genre']
 
-        plot = get_dict_item('synopsis', channel)
-        season = get_dict_item('season_num', channel)
-        episode = get_dict_item('episode_num', channel)
+        plot = get_dict_item('synopsis', channel['sub_item'])
+        season = get_dict_item('season_num', channel['sub_item'])
+        episode = get_dict_item('episode_num', channel['sub_item'])
 
         channel_url = CHANNEL_URL + '/' + channel_id
 
@@ -321,8 +336,8 @@ def list_channel(channel):
             'season':season,
             'episode':episode,
             'plot': plot,
-            'tvshowtitle': title,
-            'title': title,
+            'tvshowtitle': tvshowtitle, #Does not display for some reason(normally would be blue dialog on VideoPlayer
+            'title': title + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]',
             'originaltitle': title,
             'genre': genre
         }
@@ -571,7 +586,7 @@ def check_device_id():
         create_device_id()
         DEVICE_ID = ADDON.getSetting(id='deviceId')
 
-        
+
 addon_handle = int(sys.argv[1])
 ADDON = xbmcaddon.Addon()
 ROOTDIR = ADDON.getAddonInfo('path')
