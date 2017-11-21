@@ -44,6 +44,62 @@ def live_tv():
     json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/channel/offset/0/size/500')
     list_shows(json_source['body']['items'])
 
+def play_live(this_channel_id):
+    json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/channel/offset/0/size/500')
+    fanart = FANART
+    icon = ICON
+    for channel in json_source['body']['items']:
+        if 'channel' in channel:
+            title = channel['channel']['name']
+            channel_id = str(channel['channel']['channel_id'])
+        else:
+            title = channel['title']
+            channel_id = str(channel['id'])
+        
+        if this_channel_id == channel_id:
+
+            for image in channel['urls']:
+                if 'width' in image:
+                    if image['width'] == 600 or image['width'] == 440: icon = image['src']
+                    if image['width'] == 1920: fanart = image['src']
+                    if icon != ICON and fanart != FANART: break
+
+            genre = ''
+            for item in channel['genres']:
+                if genre != '': genre += ', '
+                genre += item['genre']
+
+            plot = get_dict_item('synopsis', channel)
+            season = get_dict_item('season_num', channel)
+            episode = get_dict_item('episode_num', channel)
+
+            channel_url = CHANNEL_URL + '/' + channel_id
+
+            info = {
+                'season':season,
+                'episode':episode,
+                'plot': plot,
+                'tvshowtitle': title,
+                'title': title,
+                'originaltitle': title,
+                'genre': genre
+            }
+
+            properties = {
+                'IsPlayable': 'true'
+            }
+
+            show_info = {
+                'channel_id': channel_id
+            }
+            
+            channel_url = CHANNEL_URL + '/' + channel_id
+            u = sys.argv[0] + "?url=" + urllib.quote_plus(channel_url) + "&mode=" + str(900)
+            liz = xbmcgui.ListItem(title)
+            liz.setInfo(type="Video", infoLabels=info)
+            liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
+            xbmc.Player().play(item=u, listitem=liz)
+
 def on_demand(channel_id):
     json_source = get_json(EPG_URL + '/details/channel/'+channel_id+'/popular/offset/0/size/500')
     list_shows(json_source['body']['popular'])
