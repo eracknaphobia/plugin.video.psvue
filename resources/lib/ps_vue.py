@@ -368,7 +368,7 @@ def list_channel(channel):
         series_id = ''
         if 'series_id' in channel['sub_item']: series_id = str(channel['sub_item']['series_id'])
         tms_id = str(channel['sub_item']['tms_id'])
-        tvshowtitle = str(channel['sub_item']['title'])
+        #tvshowtitle = str(channel['sub_item']['title'])
 
         if 'channel' in channel:
             title = channel['channel']['name']
@@ -392,7 +392,7 @@ def list_channel(channel):
             'season':season,
             'episode':episode,
             'plot': plot,
-            'tvshowtitle': tvshowtitle, #Does not display for some reason(normally would be blue dialog on VideoPlayer
+            #'tvshowtitle': tvshowtitle, #Does not display for some reason(normally would be blue dialog on VideoPlayer
             'title': title + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]',
             'originaltitle': title,
             'genre': genre
