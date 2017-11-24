@@ -9,10 +9,16 @@ channel_id='null'
 program_id='null'
 series_id='null'
 tms_id='null'
+title='null'
+plot='[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
 
 try: url=urllib.unquote_plus(params["url"])
 except: pass
 try: name=urllib.unquote_plus(params["name"])
+except: pass
+try: title=params["title"]
+except: pass
+try: plot=params["plot"]
 except: pass
 try: mode=int(params["mode"])
 except: pass
@@ -62,7 +68,7 @@ elif mode == 200:
 
 elif mode == 300:
     live_tv()
-
+    
 elif mode == 350:
     on_demand(channel_id)
 
@@ -86,8 +92,7 @@ elif mode == 800:
     main_menu()
 
 elif mode == 900:
-    get_stream(url, airing_id, channel_id, program_id, series_id, tms_id)
-
+    get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot)
 
 elif mode == 998:
     sys.exit()
