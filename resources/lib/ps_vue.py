@@ -44,7 +44,7 @@ def live_tv():
     json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/channel/offset/0/size/500')
     list_shows(json_source['body']['items'])
 
-
+ 
 def on_demand(channel_id):
     json_source = get_json(EPG_URL + '/details/channel/'+channel_id+'/popular/offset/0/size/500')
     list_shows(json_source['body']['popular'])
@@ -298,7 +298,7 @@ def list_channel(channel):
             if image['width'] == 600 or image['width'] == 440: icon = image['src']
             if image['width'] == 1920: fanart = image['src']
             if icon != ICON and fanart != FANART: break
-
+              
     airing_id = ''
     if 'id' in channel and 'airings' in channel['sub_item']:
         AID = channel['sub_item']['airings']
