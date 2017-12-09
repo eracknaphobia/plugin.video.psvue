@@ -190,10 +190,18 @@ def list_episode(show):
     show_title = show['title']
     title = show['display_episode_title']
     airing_id = str(show['airings'][0]['airing_id'])
-    channel_name = str(show['channel']['name'])
+
+    channel_name = 'null'
+    if 'airings' in show:
+        channel_name = str(show['airings'][0]['channel_name'])
+    else:
+        channel_name = str(show['channel']['name'])
 
     channel_id = 'null'
-    if 'channel_id' in show['channel']: channel_id = str(show['channel']['channel_id'])
+    if 'airings' in show:
+        channel_id = str(show['airings'][0]['channel_id'])
+    else:
+        channel_id = str(show['channel']['channel_id'])
     
     program_id = str(show['id'])
     
@@ -386,7 +394,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
     json_source = r.json()
-    stream_url = json_source['body']['video']
+    stream_url = json_source['body']['video_alt']
     headers = '|User-Agent='
     headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
     headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
