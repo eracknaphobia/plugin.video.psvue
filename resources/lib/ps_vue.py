@@ -394,7 +394,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
     json_source = r.json()
-    stream_url = json_source['body']['video_alt']
+    stream_url = json_source['body']['video']
     headers = '|User-Agent='
     headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
     headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
@@ -411,6 +411,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem.setMimeType("application/x-mpegURL")
 
     if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
+        stream_url = json_source['body']['video_alt'] # Uses alternate Sony stream to prevent Inputstream adaptive from crashing
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)
