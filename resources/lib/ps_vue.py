@@ -190,10 +190,18 @@ def list_episode(show):
     show_title = show['title']
     title = show['display_episode_title']
     airing_id = str(show['airings'][0]['airing_id'])
-    channel_name = str(show['channel']['name'])
+
+    channel_name = 'null'
+    if 'airings' in show:
+        channel_name = str(show['airings'][0]['channel_name'])
+    else:
+        channel_name = str(show['channel']['name'])
 
     channel_id = 'null'
-    if 'channel_id' in show['channel']: channel_id = str(show['channel']['channel_id'])
+    if 'airings' in show:
+        channel_id = str(show['airings'][0]['channel_id'])
+    else:
+        channel_id = str(show['channel']['channel_id'])
     
     program_id = str(show['id'])
     
@@ -403,6 +411,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem.setMimeType("application/x-mpegURL")
 
     if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
+        stream_url = json_source['body']['video_alt'] # Uses alternate Sony stream to prevent Inputstream adaptive from crashing
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)
