@@ -29,7 +29,6 @@ def all_channels():
 def timeline():
     list_timeline()
 
-
 def my_shows():
     json_source = get_json(EPG_URL + '/browse/items/favorites/filter/shows/sort/title/offset/0/size/500')
     list_shows(json_source['body']['items'])
@@ -44,7 +43,7 @@ def live_tv():
     json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/channel/offset/0/size/500')
     list_shows(json_source['body']['items'])
 
- 
+
 def on_demand(channel_id):
     json_source = get_json(EPG_URL + '/details/channel/'+channel_id+'/popular/offset/0/size/500')
     list_shows(json_source['body']['popular'])
@@ -79,36 +78,34 @@ def search():
 
 
 def list_timeline():
-    url = 'https://sentv-user-ext.totsuko.tv/sentv_user_ext/ws/v2/profile/'
+    channel_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/300')
+    # Get channel id for to tv guide selection
+    channel_dict ={}
+    channel_list = []
+    for channel in channel_source['body']['items']:
+        uni_channel = channel['title'].encode("utf-8")
+        xbmc.log(str(channel['id']) + ' ' + uni_channel)
+        channel_dict[uni_channel] = str(channel['id'])
+        channel_list.append(uni_channel)
     
-    json_source = get_json(url + PROF_ID)
-    
-    if 'body' in json_source and 'watch_history' in json_source['body']:
-        watch_history = json_source['body']['watch_history']
-        air_dict = {}
-        air_list = []
-        for airing in watch_history:
-            xbmc.log(str(airing['airing_id']) + ' ' + str(airing['last_watch_date']))
-            air_dict[str(airing['last_watch_date'])] = str(airing['airing_id'])
-            air_list.append(str(airing['last_watch_date']))
+    dialog = xbmcgui.Dialog()
+    ret = dialog.select(LOCAL_STRING(30214), channel_list)
+    if ret >= 0:
+        channel_id = channel_dict[channel_list[ret]]
+    #Json information from live and upcoming timeline for specified channel
+    #Max upcoming shows display is 10
+    json_source = get_json(EPG_URL + '/timeline/live/' + channel_id + '/watch_history_size/0/coming_up_size/20')
 
-    else:
-        dialog.notification('No airing ID found', msg, xbmcgui.NOTIFICATION_INFO, 9000)
-        sys.exit()
-    
-    json_source = get_json(EPG_URL + '/timeline/' + air_dict[air_list[0]])
-    
+    #Sort live and upcoming episodes on selected channel
+    #Some channels (not many) do not load any live or upcoming info. This is a Sony server issue.
     for strand in json_source['body']['strands']:
         if strand['id'] == 'now_playing':
-            addDir('[B][I][COLOR=FFFFFF66]Now Playing[/COLOR][/B][/I]', 998, ICON)
+            addDir('[B][I][COLOR=FFE4287C]NOW PLAYING[/COLOR][/B][/I]', 998, ICON)
             for program in strand['programs']:
                 list_episode(program)
-        elif strand['id'] == 'watched_episodes':
-            addDir('[B][I][COLOR=FFFFFF66]Watched Episodes[/COLOR][/B][/I]', 998, ICON)
-            for program in reversed(strand['programs']):
-                list_episode(program)
         elif strand['id'] == 'coming_up':
-            addDir('[B][I][COLOR=FFFFFF66]Coming Up On Channel:[/COLOR][/B][/I]'+'      '+strand['programs'][0]['channel']['name_short'], 998, ICON)
+            uni_name = strand['programs'][0]['channel']['name'].encode("utf-8")
+            addDir('[B][I][COLOR=FFE4287C]COMING UP ON:[/COLOR][/B][/I]'+'      '+uni_name, 998, ICON)
             for program in strand['programs']:
                 list_episode(program)
 
@@ -165,7 +162,7 @@ def list_show(show):
 
 
 def list_episodes(program_id):
-    url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/20'
+    url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/50'
     
     json_source = get_json(url)
     
@@ -202,7 +199,7 @@ def list_episode(show):
         channel_id = str(show['airings'][0]['channel_id'])
     else:
         channel_id = str(show['channel']['channel_id'])
-    
+
     program_id = str(show['id'])
     
     series_id = 'null'
@@ -219,12 +216,13 @@ def list_episode(show):
     #xbmc.log("DURATION = "+ str(duration.total_seconds()))
     
     airing_date = UTCToLocal(airing_date)
-    broadcast_date = ''
+
+    broadcast_date = airing_date
     if 'broadcast_date' in show:
         broadcast_date = show['broadcast_date']
         broadcast_date = stringToDate(broadcast_date, "%Y-%m-%dT%H:%M:%S.%fZ")
         broadcast_date = UTCToLocal(broadcast_date)
-    
+
     genre = ''
     for item in show['genres']:
         if genre != '': genre += ', '
@@ -232,21 +230,23 @@ def list_episode(show):
 
     plot = get_dict_item('synopsis', show)
 
-    if str(show['playable']).upper() == 'FALSE':
+    if str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE':
+        title = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + broadcast_date.strftime('%m/%d/%y') + '   ' + title
+        channel_name = show['title'] + '     ' + '[B][I][COLOR=FFFFFF66]On Demand[/COLOR][/I][/B]'
+        show_title = show['display_episode_title']
+
+    elif str(show['playable']).upper() == 'FALSE':
         # Add airing date/time to title for upcoming shows
-        title = title + '    ' + '[B][I][COLOR=FFFFFF66]Available On[/COLOR][/I][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '  @' + airing_date.strftime('%I:%M %p').lstrip('0')
+        title = '[B][I][COLOR=FFFFFF66]AIRING ON[/COLOR][/I][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '  @' + airing_date.strftime('%I:%M %p').lstrip('0') + '    ' + show_title
     
     # Sort Live shows and episodes no longer available to watch
-    if str(show['airings'][0]['badge']) == 'live':
+    elif str(show['airings'][0]['badge']) == 'live':
         title = title + '    ' + '[B][I][COLOR=FFFFFF66]Live Episode[/COLOR][/I][/B]'
         channel_name = channel_name + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
     
     elif str(show['airings'][0]['badge']) == 'no_longer_available':
         title = title + '     ' + '[B][I][COLOR=FFde0000]Episode Not Available[/COLOR][/I][/B]'
-    
-    else:
-        channel_name = show['title'] + '     ' + '[B][I][COLOR=FFFFFF66]On Demand[/COLOR][/I][/B]'
-        show_title = show['display_episode_title']
+
     
     # Add resumetime if applicable
     resumetime=''
@@ -306,7 +306,7 @@ def list_channel(channel):
             if image['width'] == 600 or image['width'] == 440: icon = image['src']
             if image['width'] == 1920: fanart = image['src']
             if icon != ICON and fanart != FANART: break
-              
+
     airing_id = ''
     if 'id' in channel and 'airings' in channel['sub_item']:
         AID = channel['sub_item']['airings']
@@ -323,17 +323,17 @@ def list_channel(channel):
     series_id = ''
     if 'series_id' in channel['sub_item']: series_id = str(channel['sub_item']['series_id'])
     tms_id = str(channel['sub_item']['tms_id'])
-
+    
     if 'channel' in channel:
         title = channel['channel']['name']
         channel_id = str(channel['channel']['channel_id'])
     else:
         title = channel['title']
         channel_id = str(channel['id'])
-        
+    
     genre = ''
     if 'item' in channel: genre = str(channel['sub_item']['genres'])
-
+    
     plot = get_dict_item('synopsis', channel['sub_item'])
     season = get_dict_item('season_num', channel['sub_item'])
     episode = get_dict_item('episode_num', channel['sub_item'])
