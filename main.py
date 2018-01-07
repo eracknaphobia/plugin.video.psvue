@@ -11,6 +11,7 @@ series_id='null'
 tms_id='null'
 title='null'
 plot='[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
+icon='null'
 
 try: url=urllib.unquote_plus(params["url"])
 except: pass
@@ -19,6 +20,8 @@ except: pass
 try: title=params["title"]
 except: pass
 try: plot=params["plot"]
+except: pass
+try: icon=params["icon"]
 except: pass
 try: mode=int(params["mode"])
 except: pass
@@ -92,7 +95,7 @@ elif mode == 800:
     main_menu()
 
 elif mode == 900:
-    get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot)
+    get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
 
 elif mode == 998:
     sys.exit()
