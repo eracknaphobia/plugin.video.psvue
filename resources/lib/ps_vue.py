@@ -100,12 +100,22 @@ def list_timeline():
     #Some channels (not many) do not load any live or upcoming info. This is a Sony server issue.
     for strand in json_source['body']['strands']:
         if strand['id'] == 'now_playing':
-            addDir('[B][I][COLOR=FFE4287C]NOW PLAYING[/COLOR][/B][/I]', 998, ICON)
+            icon = ICON
+            for image in strand['programs'][0]['channel']['urls']: #Display Channel icon
+                if 'width' in image:
+                    if image['width'] == 600 or image['width'] == 440: icon = image['src']
+                    if icon != ICON: break
+            addDir('[B][I][COLOR=FFE4287C]NOW PLAYING[/COLOR][/B][/I]', 998, icon)
             for program in strand['programs']:
                 list_episode(program)
         elif strand['id'] == 'coming_up':
+            icon = ICON
+            for image in strand['programs'][0]['channel']['urls']:
+                if 'width' in image:
+                    if image['width'] == 600 or image['width'] == 440: icon = image['src']
+                    if icon != ICON: break
             uni_name = strand['programs'][0]['channel']['name'].encode("utf-8")
-            addDir('[B][I][COLOR=FFE4287C]COMING UP ON:[/COLOR][/B][/I]'+'      '+uni_name, 998, ICON)
+            addDir('[B][I][COLOR=FFE4287C]COMING UP ON:[/COLOR][/B][/I]'+'      '+uni_name, 998, icon)
             for program in strand['programs']:
                 list_episode(program)
 
@@ -213,7 +223,6 @@ def list_episode(show):
     airing_enddate = stringToDate(airing_enddate, "%Y-%m-%dT%H:%M:%S.%fZ")
     
     duration = airing_enddate - airing_date
-    #xbmc.log("DURATION = "+ str(duration.total_seconds()))
     
     airing_date = UTCToLocal(airing_date)
 
@@ -359,7 +368,8 @@ def list_channel(channel):
             'program_id': program_id,
             'series_id': series_id,
             'tms_id': tms_id,
-            'title': title
+            'title': title,
+            'icon': icon
                 }
 
     if 'channel_type' in channel:
@@ -378,7 +388,7 @@ def get_dict_item(key, dictionary):
         return ''
 
 
-def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot):
+def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon):
     headers = {'Accept': '*/*',
                'Content-type': 'application/x-www-form-urlencoded',
                'Origin': 'https://vue.playstation.com',
@@ -402,7 +412,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     # Checks to see if VideoPlayer info is already saved. If not then info is loaded from stream link
     if xbmc.getCondVisibility('String.IsEmpty(ListItem.Title)'):
-        listitem = xbmcgui.ListItem(title, plot)
+        listitem = xbmcgui.ListItem(title, plot, thumbnailImage=icon)
         listitem.setInfo(type="Video", infoLabels={'title': title, 'plot': plot})
         listitem.setMimeType("application/x-mpegURL")
 
