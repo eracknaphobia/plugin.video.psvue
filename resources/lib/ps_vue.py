@@ -420,7 +420,9 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem = xbmcgui.ListItem()
         listitem.setMimeType("application/x-mpegURL")
 
-    if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
+    inputstreamCOND = str(json_source['body']['dai_method']) # Checks whether stream method is "mlbam" or "freewheel"
+
+    if  inputstreamCOND == 'mlbam' and xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
         stream_url = json_source['body']['video_alt'] # Uses alternate Sony stream to prevent Inputstream adaptive from crashing
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
