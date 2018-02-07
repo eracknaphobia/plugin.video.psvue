@@ -138,12 +138,12 @@ def list_show(show):
     airing_id = 'null'
     if 'airing_id' in show: airing_id = str(show['airings']['airing_id'])
     channel_id = 'null'
-    if 'channel_id' in show: channel_id = str(show['airings']['channel_id'])
+    if 'channel' in show: channel_id = str(show['channel']['channel_id'])
     program_id = str(show['id'])
     series_id = 'null'
     if 'series_id' in show: series_id = str(show['series_id'])
     tms_id = str(show['tms_id'])
-        
+
     genre = ''
     for item in show['genres']:
         if genre != '': genre += ', '
@@ -153,12 +153,11 @@ def list_show(show):
     if plot == '': plot = get_dict_item('synopsis', show)
 
     info = {
-            'plot': plot,
-            'tvshowtitle': title,
-            'title': title,
-            'originaltitle': title,
-            'genre': genre
-            }
+        'plot': plot,
+        'title': title + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]',
+        'originaltitle': title,
+        'genre': genre
+           }
         
     show_info = {
             'airing_id': airing_id,
@@ -167,8 +166,18 @@ def list_show(show):
             'series_id': series_id,
             'tms_id': tms_id
                 }
-        
-    addShow(title, 150, icon, fanart, info, show_info)
+
+    properties = {
+            'IsPlayable': 'true'
+                 }
+
+    channel_url = CHANNEL_URL + '/' + channel_id
+
+    if str(show['airings'][0]['badge']) == 'live':
+        addStream(title, channel_url, title, icon, fanart, info, properties, show_info)
+
+    else:
+        addShow(title, 150, icon, fanart, info, show_info)
 
 
 def list_episodes(program_id):
