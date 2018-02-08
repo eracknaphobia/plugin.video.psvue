@@ -44,7 +44,7 @@ sony = SONY()
 
 if mode < 998:
     if ADDON.getSetting(id='last_auth') != '':
-        last_auth = stringToDate(ADDON.getSetting(id='last_auth'), "%Y-%m-%dT%H:%M:%S.%fZ")
+        last_auth = string_to_date(ADDON.getSetting(id='last_auth'), "%Y-%m-%dT%H:%M:%S.%fZ")
         if (datetime.utcnow() - last_auth).total_seconds() > 900: sony.check_auth()
     else:
         sony.check_auth()
