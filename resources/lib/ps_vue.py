@@ -317,15 +317,16 @@ def list_channel(channel):
             if icon != ICON and fanart != FANART: break
 
     airing_id = ''
-    if 'id' in channel and 'airings' in channel['sub_item']:
-        AID = channel['sub_item']['airings']
+    if 'id' in channel and 'airings' in channel['sub_item'] and channel['sub_item']['airings']:
         air_dict = {}
         air_list = []
-        for airing in AID:
+        for airing in channel['sub_item']['airings']:
             xbmc.log(str(airing['airing_id']) + ' ' + str(airing['type']))
             air_dict[str(airing['type'])] = str(airing['airing_id'])
             air_list.append(str(airing['type']))
-    airing_id = air_dict[air_list[0]]
+
+        airing_id = air_dict[air_list[0]]
+
 
     program_id = ''
     if 'id' in channel['sub_item']: program_id = str(channel['sub_item']['id'])
@@ -630,4 +631,4 @@ UA_ANDROID_TV = 'Mozilla/5.0 (Linux; Android 6.0.1; Hub Build/MHC19J; wv) AppleW
 CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/channel'
 EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'
 PROF_ID = ADDON.getSetting(id='default_profile')
-VERIFY = True
+VERIFY = False
