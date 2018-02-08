@@ -378,7 +378,7 @@ class SONY():
         payload += '"stream_type":"null"}'
 
         #xbmc.log("The Payload is: " + payload)
-        r = requests.put(url, headers=headers, data=payload, verify=self.verify)
+        requests.put(url, headers=headers, data=payload, verify=self.verify)
 
 
     def save_cookies(self, cookiejar):

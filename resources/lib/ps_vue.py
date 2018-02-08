@@ -11,7 +11,7 @@ from sony import SONY
 
 def main_menu():
     if ADDON.getSetting(id='all_chan_visible') == 'true': add_dir(LOCAL_STRING(30224), 30, ICON)
-    if ADDON.getSetting(id='timeline_visible') == 'true': add_dir(LOCAL_STRING(30100), 50, ICON)
+    if ADDON.getSetting(id='next_airings_visible') == 'true': add_dir(LOCAL_STRING(30100), 50, ICON)
     if ADDON.getSetting(id='myshows_visible') == 'true': add_dir(LOCAL_STRING(30101), 100, ICON)
     if ADDON.getSetting(id='fav_visible') == 'true': add_dir(LOCAL_STRING(30102), 200, ICON)
     if ADDON.getSetting(id='live_visible') == 'true': add_dir(LOCAL_STRING(30103), 300, ICON)
@@ -27,8 +27,8 @@ def all_channels():
     list_channels(json_source['body']['items'])
 
 
-def timeline():
-    list_timeline()
+def next_airings():
+    list_next_airings()
 
 
 def my_shows():
@@ -80,7 +80,7 @@ def search():
     list_shows(json_source['body']['programs'])
 
 
-def list_timeline():
+def list_next_airings():
     channel_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/300')
     # Get channel id for to tv guide selection
     channel_dict ={}
@@ -93,8 +93,10 @@ def list_timeline():
     
     dialog = xbmcgui.Dialog()
     ret = dialog.select(LOCAL_STRING(30214), channel_list)
-    if ret >= 0:
-        channel_id = channel_dict[channel_list[ret]]
+    if ret < 0:
+        sys.exit()
+
+    channel_id = channel_dict[channel_list[ret]]
     #Json information from live and upcoming timeline for specified channel
     #Max upcoming shows display is 10
     json_source = get_json(EPG_URL + '/timeline/live/' + channel_id + '/watch_history_size/0/coming_up_size/20')
@@ -137,12 +139,8 @@ def list_show(show):
             if image['width'] >= 1080: fanart = image['src']
             if icon != ICON and fanart != FANART: break
 
-    title = show['title']
-    if 'title_sub' in show:
-        tv_show_title = show['title_sub']
-    else:
-        tv_show_title = title
-        
+    title = show['display_title']
+
     airing_id = 'null'
     if 'airing_id' in show: airing_id = str(show['airings']['airing_id'])
     channel_id = 'null'
@@ -162,7 +160,6 @@ def list_show(show):
 
     info = {
             'plot': plot,
-            'tvshowtitle': tv_show_title,
             'title': title,
             'originaltitle': title,
             'genre': genre
@@ -254,7 +251,7 @@ def list_episode(show):
 
     elif str(show['playable']).upper() == 'FALSE':
         # Add airing date/time to title for upcoming shows
-        title = '[B][I][COLOR=FFFFFF66]AIRING ON[/COLOR][/I][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '  @' + airing_date.strftime('%I:%M %p').lstrip('0') + '    ' + show_title
+        title = '[B][I][COLOR=FFFFFF66]AIRING ON[/COLOR][/I][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '  @' + airing_date.strftime('%I:%M %p').lstrip('0') + '    ' + title
     
     # Sort Live shows and episodes no longer available to watch
     elif str(show['airings'][0]['badge']) == 'live':
@@ -267,12 +264,12 @@ def list_episode(show):
     
     # Add resumetime if applicable
     resumetime=''
-    try:
+    if 'last_timecode' in show['airings'][0]:
         resumetime = str(show['airings'][0]['last_timecode'])
         xbmc.log("RESUME TIME = "+resumetime)
         h,m,s = resumetime.split(':')
         resumetime = str(int(h) * 3600 + int(m) * 60 + int(s))
-    except: pass
+
     #xbmc.log("RESUME TIME IN Seconds = "+resumetime)
     #xbmc.log("TOTAL TIME IN Seconds = "+str(int(duration.total_seconds())))
     
@@ -285,7 +282,7 @@ def list_episode(show):
         'originaltitle': title,
         'mediatype': 'episode',
         'genre': genre,
-        'aired': airing_date.strftime('%Y-%m-%d'),
+        'aired': broadcast_date.strftime('%Y-%m-%d'),
         'duration': str(int(duration.total_seconds()))
     }
     if broadcast_date != '': info['premiered'] = broadcast_date.strftime('%Y-%m-%d')
@@ -305,7 +302,7 @@ def list_episode(show):
         'tms_id': tms_id,
         'title': title,
         'plot': plot
-}
+    }
     
     add_stream(title, show_url, title, icon, fanart, info, properties, show_info)
 
@@ -452,7 +449,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     # Seek to time
 
     #Give the stream sometime to start before checking
-
+    '''
     monitor = xbmc.Monitor()
     monitor.waitForAbort(10)
     xbmc.log("Is playing video? " + str(xbmc.Player().isPlayingVideo()))
@@ -463,7 +460,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     xbmc.log("We're done, write info back to ps servers!!!")
     sony = SONY()
     sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id)
-
+    '''
 
 def get_json(url):
     headers = {'Accept': '*/*',

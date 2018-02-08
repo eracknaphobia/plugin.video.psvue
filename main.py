@@ -58,7 +58,7 @@ elif mode == 30:
     all_channels()
 
 elif mode == 50:
-    timeline()
+    next_airings()
 
 elif mode == 100:
     my_shows()
