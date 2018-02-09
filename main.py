@@ -50,7 +50,7 @@ if mode < 998:
         sony.check_auth()
 
 
-if mode == None and mode < 998:
+if mode is None and mode < 998:
     if ADDON.getSetting(id='default_profile') == '' or ADDON.getSetting(id='always_ask_profile') == 'true': sony.get_profiles()
     main_menu()
 
@@ -129,7 +129,7 @@ elif mode == 1002:
     sony.remove_from_favorites(ids)
 
 
-if mode != None and mode != 800 and mode != 750:
+if mode is not None and mode != 800 and mode != 750:
     xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)
 elif mode == 800:
     xbmcplugin.endOfDirectory(addon_handle, updateListing=True)

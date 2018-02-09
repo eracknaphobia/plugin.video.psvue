@@ -140,7 +140,6 @@ def list_show(show):
             if icon != ICON and fanart != FANART: break
 
     title = show['display_title']
-
     airing_id = 'null'
     if 'airing_id' in show: airing_id = str(show['airings']['airing_id'])
     channel_id = 'null'
@@ -163,7 +162,7 @@ def list_show(show):
             'title': title,
             'originaltitle': title,
             'genre': genre
-            }
+    }
         
     show_info = {
             'airing_id': airing_id,
@@ -171,16 +170,14 @@ def list_show(show):
             'program_id': program_id,
             'series_id': series_id,
             'tms_id': tms_id
-                }
+    }
         
     add_show(title, 150, icon, fanart, info, show_info)
 
 
 def list_episodes(program_id):
     url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/50'
-    
     json_source = get_json(url)
-    
     # Sort by airing_date newest to oldest
     json_source = json_source['body']['items']
     json_source = sorted(json_source, key=lambda k: k['airing_date'], reverse=True)
@@ -199,8 +196,8 @@ def list_episode(show):
             if icon != ICON and fanart != FANART: break
 
     # Set variables from json
-    show_title = show['title']
-    title = show['display_episode_title']
+    title = show['display_title']
+    show_title = show['display_episode_title']
     airing_id = str(show['airings'][0]['airing_id'])
 
     channel_name = 'null'
@@ -226,7 +223,8 @@ def list_episode(show):
     airing_date = string_to_date(airing_date, "%Y-%m-%dT%H:%M:%S.%fZ")
     airing_enddate = str(show['airings'][0]['airing_enddate'])
     airing_enddate = string_to_date(airing_enddate, "%Y-%m-%dT%H:%M:%S.%fZ")
-    
+
+    age_rating = get_dict_item('age_rating',show['airings'][0])
     duration = airing_enddate - airing_date
     
     airing_date = utc_to_local(airing_date)
@@ -235,7 +233,11 @@ def list_episode(show):
     if 'broadcast_date' in show:
         broadcast_date = show['broadcast_date']
         broadcast_date = string_to_date(broadcast_date, "%Y-%m-%dT%H:%M:%S.%fZ")
-        broadcast_date = utc_to_local(broadcast_date)
+        #broadcast_date = utc_to_local(broadcast_date)
+
+    media_type = 'tvshow'
+    if 'movie' in get_dict_item('sentv_type',show).lower():
+        media_type = 'movie'
 
     genre = ''
     for item in show['genres']:
@@ -245,21 +247,21 @@ def list_episode(show):
     plot = get_dict_item('synopsis', show)
 
     if str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE':
-        title = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + broadcast_date.strftime('%m/%d/%y') + '   ' + title
-        channel_name = show['title'] + '     ' + '[B][I][COLOR=FFFFFF66]On Demand[/COLOR][/I][/B]'
-        show_title = show['display_episode_title']
+        name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '   ' + show_title
+        #channel_name = show['title'] + '     ' + '[B][I][COLOR=FFFFFF66]On Demand[/COLOR][/I][/B]'
+        #show_title = show['display_episode_title']
 
     elif str(show['playable']).upper() == 'FALSE':
         # Add airing date/time to title for upcoming shows
-        title = '[B][I][COLOR=FFFFFF66]AIRING ON[/COLOR][/I][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '  @' + airing_date.strftime('%I:%M %p').lstrip('0') + '    ' + title
+        name = '[B][I][COLOR=FFFFFF66]AIRING ON[/COLOR][/I][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '  @' + airing_date.strftime('%I:%M %p').lstrip('0') + '    ' + show_title
     
     # Sort Live shows and episodes no longer available to watch
     elif str(show['airings'][0]['badge']) == 'live':
-        title = title + '    ' + '[B][I][COLOR=FFFFFF66]Live Episode[/COLOR][/I][/B]'
-        channel_name = channel_name + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
+        name = show_title + '    ' + '[B][I][COLOR=FFFFFF66]Live Episode[/COLOR][/I][/B]'
+        #channel_name = channel_name + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
     
     elif str(show['airings'][0]['badge']) == 'no_longer_available':
-        title = title + '     ' + '[B][I][COLOR=FFde0000]Episode Not Available[/COLOR][/I][/B]'
+        name = show_title + '     ' + '[B][I][COLOR=FFde0000]Episode Not Available[/COLOR][/I][/B]'
 
     
     # Add resumetime if applicable
@@ -273,22 +275,25 @@ def list_episode(show):
     #xbmc.log("RESUME TIME IN Seconds = "+resumetime)
     #xbmc.log("TOTAL TIME IN Seconds = "+str(int(duration.total_seconds())))
     
-    show_url = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/' + airing_id
+    show_url = SHOW_URL + '/' + airing_id
     
     info = {
         'plot': plot,
         'tvshowtitle': show_title,
-        'title': channel_name,
+        'title': title,
         'originaltitle': title,
-        'mediatype': 'episode',
+        'mediatype': media_type,
         'genre': genre,
         'aired': broadcast_date.strftime('%Y-%m-%d'),
-        'duration': str(int(duration.total_seconds()))
+        'duration': str(int(duration.total_seconds())),
+        'season': get_dict_item('season_num',show),
+        'episode': get_dict_item('episode_num',show),
+        'mpaa': age_rating
     }
+
     if broadcast_date != '': info['premiered'] = broadcast_date.strftime('%Y-%m-%d')
     
     properties = {
-        
         'totaltime': str(int(duration.total_seconds())),
         'resumetime': resumetime,
         'IsPlayable': str(show['playable']).lower()
@@ -304,7 +309,7 @@ def list_episode(show):
         'plot': plot
     }
     
-    add_stream(title, show_url, title, icon, fanart, info, properties, show_info)
+    add_stream(name, show_url, icon, fanart, info, properties, show_info)
 
 
 def list_channels(json_source):
@@ -363,10 +368,10 @@ def list_channel(channel):
             'season':season,
             'episode':episode,
             'plot': plot,
-            'title': title + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]',
+            'title': title,
             'originaltitle': title,
             'genre': genre
-        }
+    }
         
     properties = {
             'IsPlayable': 'true'
@@ -380,15 +385,12 @@ def list_channel(channel):
             'tms_id': tms_id,
             'title': title,
             'icon': icon
-                }
+    }
 
-    if 'channel_type' in channel:
-        if channel['channel_type'] != 'vod':
-                add_stream(title, channel_url, title, icon, fanart, info, properties, show_info)
-        else:
-            add_dir(title, 350, icon, fanart, channel_id)
+    if get_dict_item('channel_type',channel) == 'vod':
+        add_dir(title, 350, icon, fanart, channel_id)
     else:
-        add_stream(title, channel_url, title, icon, fanart, info, properties, show_info)
+        add_stream(title, channel_url, icon, fanart, info, properties, show_info)
 
 
 def get_dict_item(key, dictionary):
@@ -410,7 +412,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
                'Host': 'media-framework.totsuko.tv',
                'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
                'X-Requested-With': 'com.snei.vue.android'
-              }
+    }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
     json_source = r.json()
@@ -438,7 +440,6 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)
         listitem.setProperty('inputstream.adaptive.license_key', headers)
-    
     else:
         stream_url += headers
 
@@ -531,9 +532,9 @@ def utc_to_local(utc_dt):
 
 def add_dir(name, mode, icon, fanart=None, channel_id=None):
     u = sys.argv[0] + "?mode=" + str(mode)
-    if channel_id != None: u += "&channel_id="+channel_id
+    if channel_id is not None: u += "&channel_id=" + channel_id
     liz = xbmcgui.ListItem(name)
-    if fanart == None: fanart = FANART
+    if fanart is None: fanart = FANART
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
     ok = xbmcplugin.addDirectoryItem(handle=addon_handle, url=u, listitem=liz, isFolder=True)
     xbmcplugin.setContent(addon_handle, 'tvshows')
@@ -545,7 +546,7 @@ def add_show(name, mode, icon, fanart, info, show_info):
     u += '&program_id=' + show_info['program_id']
     
     liz = xbmcgui.ListItem(name)
-    if fanart == None: fanart = FANART
+    if fanart is None: fanart = FANART
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
     liz.setInfo(type="Video", infoLabels=info)
     show_values =''
@@ -559,17 +560,17 @@ def add_show(name, mode, icon, fanart, info, show_info):
     xbmcplugin.setContent(addon_handle, 'tvshows')
 
 
-def add_stream(name, link_url, title, icon, fanart, info=None, properties=None, show_info=None):
+def add_stream(name, link_url, icon, fanart, info=None, properties=None, show_info=None):
     u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url) + "&mode=" + str(900)
     #xbmc.log(str(info))
     liz = xbmcgui.ListItem(name)
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
-    if info != None: liz.setInfo(type="Video", infoLabels=info)
-    if properties != None:
+    if info is not None: liz.setInfo(type="Video", infoLabels=info)
+    if properties is not None:
         for key, value in properties.iteritems():
             liz.setProperty(key,value)
     xbmc.log(str(show_info))
-    if show_info != None:
+    if show_info is not None:
         show_values =''
         for key, value in show_info.iteritems():
             show_values += '&' + key + '=' + value
@@ -603,19 +604,18 @@ def get_params():
     return param
 
 def check_device_id():
-    DEVICE_ID = ADDON.getSetting(id='deviceId')
+    device_id = ADDON.getSetting(id='deviceId')
     amazon_device = 'Amazon'
     amazon_device = amazon_device.encode("hex")
     old_asus = 'ASUS'
     old_asus = old_asus.encode("hex")
-    if amazon_device in DEVICE_ID or old_asus in DEVICE_ID:
+    if amazon_device in device_id or old_asus in device_id:
         sony = SONY()
         sony.logout()
-        DEVICE_ID = ''
+        device_id = ''
     
-    if DEVICE_ID == '':
+    if  device_id == '':
         create_device_id()
-        DEVICE_ID = ADDON.getSetting(id='deviceId')
 
 
 addon_handle = int(sys.argv[1])
@@ -629,5 +629,6 @@ UA_ANDROID = 'Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/5
 UA_ANDROID_TV = 'Mozilla/5.0 (Linux; Android 6.0.1; Hub Build/MHC19J; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Safari/537.36'
 CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/channel'
 EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'
+SHOW_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/'
 PROF_ID = ADDON.getSetting(id='default_profile')
 VERIFY = False
