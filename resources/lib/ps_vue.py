@@ -345,7 +345,6 @@ def list_channel(channel):
 
             airing_id = air_dict[air_list[0]]
 
-
         if 'id' in channel['sub_item']: program_id = str(channel['sub_item']['id'])
         if 'series_id' in channel['sub_item']: series_id = str(channel['sub_item']['series_id'])
         tms_id = str(channel['sub_item']['tms_id'])
@@ -361,9 +360,8 @@ def list_channel(channel):
         title = channel['title']
         channel_id = str(channel['id'])
 
-
     channel_url = CHANNEL_URL + '/' + channel_id
-    
+
     info = {
             'season':season,
             'episode':episode,
@@ -434,7 +432,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     inputstreamCOND = str(json_source['body']['dai_method']) # Checks whether stream method is "mlbam" or "freewheel"
 
-    if  inputstreamCOND == 'mlbam' and xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
+    if inputstreamCOND == 'mlbam' and xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
         stream_url = json_source['body']['video_alt'] # Uses alternate Sony stream to prevent Inputstream adaptive from crashing
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
@@ -449,7 +447,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     # Seek to time
 
-    #Give the stream sometime to start before checking
+    # Give the stream sometime to start before checking
     '''
     monitor = xbmc.Monitor()
     monitor.waitForAbort(10)
