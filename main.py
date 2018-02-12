@@ -44,13 +44,13 @@ sony = SONY()
 
 if mode < 998:
     if ADDON.getSetting(id='last_auth') != '':
-        last_auth = stringToDate(ADDON.getSetting(id='last_auth'), "%Y-%m-%dT%H:%M:%S.%fZ")
+        last_auth = string_to_date(ADDON.getSetting(id='last_auth'), "%Y-%m-%dT%H:%M:%S.%fZ")
         if (datetime.utcnow() - last_auth).total_seconds() > 900: sony.check_auth()
     else:
         sony.check_auth()
 
 
-if mode == None and mode < 998:
+if mode is None and mode < 998:
     if ADDON.getSetting(id='default_profile') == '' or ADDON.getSetting(id='always_ask_profile') == 'true': sony.get_profiles()
     main_menu()
 
@@ -58,7 +58,7 @@ elif mode == 30:
     all_channels()
 
 elif mode == 50:
-    timeline()
+    next_airings()
 
 elif mode == 100:
     my_shows()
@@ -129,7 +129,7 @@ elif mode == 1002:
     sony.remove_from_favorites(ids)
 
 
-if mode != None and mode != 800 and mode != 750:
+if mode is not None and mode != 800 and mode != 750:
     xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)
 elif mode == 800:
     xbmcplugin.endOfDirectory(addon_handle, updateListing=True)
