@@ -20,7 +20,6 @@ def main_menu():
     if ADDON.getSetting(id='recent_visible') == 'true': add_dir(LOCAL_STRING(30106), 600, ICON)
     if ADDON.getSetting(id='featured_visible') == 'true': add_dir(LOCAL_STRING(30107), 700, ICON)
     if ADDON.getSetting(id='search_visible') == 'true': add_dir(LOCAL_STRING(30211), 750, ICON)
-      
 
 def all_channels():
     json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/500')
@@ -29,7 +28,6 @@ def all_channels():
 
 def next_airings():
     list_next_airings()
-    
 
 def my_shows():
     json_source = get_json(EPG_URL + '/browse/items/favorites/filter/shows/sort/title/offset/0/size/500')
@@ -43,8 +41,7 @@ def favorite_channels():
 
 def live_tv():
     json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/channel/offset/0/size/500')
-    #list_shows(json_source['body']['items'])
-    list_channels(json_source['body']['items'])
+    list_shows(json_source['body']['items'])
 
 
 def on_demand(channel_id):
@@ -138,12 +135,13 @@ def list_show(show):
             if image['width'] == 600: icon = image['src']
             if image['width'] >= 1080: fanart = image['src']
             if icon != ICON and fanart != FANART: break
-              
     title = show['display_title']
+        
     airing_id = 'null'
     if 'airings' in show: airing_id = str(show['airings'][0]['airing_id'])
     channel_id = 'null'
     if 'channel' in show: channel_id = str(show['channel']['channel_id'])
+    program_id = 'null'
     program_id = str(show['id'])
     series_id = 'null'
     if 'series_id' in show: series_id = str(show['series_id'])
@@ -158,11 +156,11 @@ def list_show(show):
     if plot == '': plot = get_dict_item('synopsis', show)
 
     info = {
-            'plot': plot,
-            'title': title,
-            'originaltitle': title,
-            'genre': genre
-    }
+        'plot': plot,
+        'title': title,
+        'originaltitle': title,
+        'genre': genre
+           }
         
     show_info = {
             'airing_id': airing_id,
@@ -170,11 +168,11 @@ def list_show(show):
             'program_id': program_id,
             'series_id': series_id,
             'tms_id': tms_id
-    }
+                }
 
     properties = {
             'IsPlayable': 'true'
-    }
+                 }
 
     channel_url = CHANNEL_URL + '/' + channel_id
 
@@ -183,14 +181,13 @@ def list_show(show):
 
     else:
         add_show(title, 150, icon, fanart, info, show_info)
-        
-    add_show(title, 150, icon, fanart, info, show_info)
-
 
 
 def list_episodes(program_id):
     url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/50'
+    
     json_source = get_json(url)
+    
     # Sort by airing_date newest to oldest
     json_source = json_source['body']['items']
     json_source = sorted(json_source, key=lambda k: k['airing_date'], reverse=True)
@@ -260,7 +257,7 @@ def list_episode(show):
 
     if str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE':
         name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + broadcast_date.strftime('%m/%d/%y') + '   ' + title
-        channel_name = show['title'] + '     ' + '[B][I][COLOR=FFFFFF66]On Demand[/COLOR][/I][/B]'
+        channel_name = show['title']
         show_title = show['display_episode_title']
 
     elif str(show['playable']).upper() == 'FALSE':
@@ -269,12 +266,9 @@ def list_episode(show):
     
     # Sort Live shows and episodes no longer available to watch
     elif str(show['airings'][0]['badge']) == 'live':
-        name = title + '    ' + '[B][I][COLOR=FFFFFF66]Live Episode[/COLOR][/I][/B]'
+        name = title
         channel_name = channel_name + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
     
-    elif str(show['airings'][0]['badge']) == 'no_longer_available':
-        name = title + '     ' + '[B][I][COLOR=FFde0000]Episode Not Available[/COLOR][/I][/B]'
-
 
     # Add resumetime if applicable
     resumetime=''
@@ -292,7 +286,7 @@ def list_episode(show):
     info = {
         'plot': plot,
         'tvshowtitle': show_title,
-        'title': title,
+        'title': channel_name,
         'originaltitle': title,
         'mediatype': media_type,
         'genre': genre,
@@ -319,7 +313,7 @@ def list_episode(show):
         'tms_id': tms_id,
         'title': title,
         'plot': plot
-    }
+}
     
     add_stream(name, show_url, icon, fanart, info, properties, show_info)
 
@@ -346,7 +340,7 @@ def list_channel(channel):
     plot = ''
     season = ''
     episode = ''
-
+    
     if 'id' in channel and 'sub_item' in channel:
         if 'airings' in channel['sub_item'] and channel['sub_item']['airings']:
             air_dict = {}
@@ -372,9 +366,16 @@ def list_channel(channel):
     else:
         title = channel['title']
         channel_id = str(channel['id'])
+    
+    genre = ''
+    if 'item' in channel: genre = str(channel['sub_item']['genres'])
+    
+    plot = get_dict_item('synopsis', channel['sub_item'])
+    season = get_dict_item('season_num', channel['sub_item'])
+    episode = get_dict_item('episode_num', channel['sub_item'])
 
     channel_url = CHANNEL_URL + '/' + channel_id
-
+    
     info = {
             'season':season,
             'episode':episode,
@@ -382,7 +383,7 @@ def list_channel(channel):
             'title': title,
             'originaltitle': title,
             'genre': genre
-    }
+        }
         
     properties = {
             'IsPlayable': 'true'
@@ -396,7 +397,7 @@ def list_channel(channel):
             'tms_id': tms_id,
             'title': title,
             'icon': icon
-    }
+                }
 
     if get_dict_item('channel_type',channel) == 'vod':
         add_dir(title, 350, icon, fanart, channel_id)
@@ -460,19 +461,20 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     # Seek to time
 
-
     #Give the stream sometime to start before checking
     monitor = xbmc.Monitor()
     monitor.waitForAbort(10)
     xbmc.log("Is playing video? " + str(xbmc.Player().isPlayingVideo()))
     while xbmc.Player().isPlayingVideo() and not monitor.abortRequested():
         xbmc.log("Still playing...")
+        playTime = str(xbmc.Player().getTime())
         monitor.waitForAbort(3)
-
     xbmc.log("We're done, write info back to ps servers!!!")
+    IntTime = int(float(playTime))
+    ResTime = time.strftime("%H:%M:%S", time.gmtime(IntTime))
     sony = SONY()
-    sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id)
-
+    sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id, ResTime)
+    
 def get_json(url):
     headers = {'Accept': '*/*',
                'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
