@@ -584,13 +584,18 @@ def add_show(name, mode, icon, fanart, info, show_info):
 
 
 def add_stream(name, link_url, icon, fanart, info=None, properties=None, show_info=None):
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url) + "&mode=" + str(900)
+    u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url)
     liz = xbmcgui.ListItem(name)
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
     if info is not None: liz.setInfo(type="Video", infoLabels=info)
     if properties is not None:
         for key, value in properties.iteritems():
             liz.setProperty(key,value)
+        if 'IsPlayable' in properties and properties['IsPlayable'] == 'false':
+            u += "&mode=" + str(998)
+        else:
+            u += "&mode=" + str(900)
+
     if show_info is not None:
         show_values = ''
         for key, value in show_info.iteritems():
