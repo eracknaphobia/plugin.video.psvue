@@ -184,7 +184,7 @@ def list_show(show):
 
 
 def list_episodes(program_id):
-    url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/50'
+    url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/75'
     
     json_source = get_json(url)
     
@@ -464,16 +464,24 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     #Give the stream sometime to start before checking
     monitor = xbmc.Monitor()
     monitor.waitForAbort(10)
+    watched = 'false'
+    playTime = 0
     xbmc.log("Is playing video? " + str(xbmc.Player().isPlayingVideo()))
     while xbmc.Player().isPlayingVideo() and not monitor.abortRequested():
         xbmc.log("Still playing...")
-        playTime = str(xbmc.Player().getTime())
+        playTime = str(xbmc.Player().getTime())#Get timestamp of video from VideoPlayer to save as resume time
+        mark_watched = xbmc.Player().getTotalTime()#Get the total time of video playing
         monitor.waitForAbort(3)
     xbmc.log("We're done, write info back to ps servers!!!")
-    IntTime = int(float(playTime))
-    ResTime = time.strftime("%H:%M:%S", time.gmtime(IntTime))
+    IntTime = int(float(playTime))#Convert VideoPlayer seconds from float to int
+    res_time = time.strftime("%H:%M:%S", time.gmtime(IntTime))#Convert seconds to 00:00:00 resume time
+    cur_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S:%SZ")
+
+    if mark_watched - IntTime <= 120: #Mark video as watched if less than 2 minutes are left
+        watched = 'true'
+
     sony = SONY()
-    sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id, ResTime)
+    sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id, res_time, cur_time, watched)
     
 def get_json(url):
     headers = {'Accept': '*/*',
