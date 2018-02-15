@@ -21,6 +21,7 @@ def main_menu():
     if ADDON.getSetting(id='featured_visible') == 'true': add_dir(LOCAL_STRING(30107), 700, ICON)
     if ADDON.getSetting(id='search_visible') == 'true': add_dir(LOCAL_STRING(30211), 750, ICON)
 
+
 def all_channels():
     json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/500')
     list_channels(json_source['body']['items'])
@@ -28,6 +29,7 @@ def all_channels():
 
 def next_airings():
     list_next_airings()
+
 
 def my_shows():
     json_source = get_json(EPG_URL + '/browse/items/favorites/filter/shows/sort/title/offset/0/size/500')
@@ -268,7 +270,6 @@ def list_episode(show):
     elif str(show['airings'][0]['badge']) == 'live':
         name = title
         channel_name = channel_name + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
-    
 
     # Add resumetime if applicable
     resumetime=''
@@ -335,12 +336,8 @@ def list_channel(channel):
     airing_id = ''
     program_id = ''
     series_id = ''
-    genre = ''
     tms_id = ''
-    plot = ''
-    season = ''
-    episode = ''
-    
+
     if 'id' in channel and 'sub_item' in channel:
         if 'airings' in channel['sub_item'] and channel['sub_item']['airings']:
             air_dict = {}
@@ -355,10 +352,6 @@ def list_channel(channel):
         if 'id' in channel['sub_item']: program_id = str(channel['sub_item']['id'])
         if 'series_id' in channel['sub_item']: series_id = str(channel['sub_item']['series_id'])
         tms_id = str(channel['sub_item']['tms_id'])
-        if 'item' in channel: genre = str(channel['sub_item']['genres'])
-        plot = get_dict_item('synopsis', channel['sub_item'])
-        season = get_dict_item('season_num', channel['sub_item'])
-        episode = get_dict_item('episode_num', channel['sub_item'])
 
     if 'channel' in channel:
         title = channel['channel']['name']
@@ -366,10 +359,8 @@ def list_channel(channel):
     else:
         title = channel['title']
         channel_id = str(channel['id'])
-    
-    genre = ''
-    if 'item' in channel: genre = str(channel['sub_item']['genres'])
-    
+
+    genre = get_dict_item('genres', channel['sub_item'])
     plot = get_dict_item('synopsis', channel['sub_item'])
     season = get_dict_item('season_num', channel['sub_item'])
     episode = get_dict_item('episode_num', channel['sub_item'])
