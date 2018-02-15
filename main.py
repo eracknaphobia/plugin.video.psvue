@@ -117,7 +117,11 @@ elif mode == 1001:
         'series_id': series_id,
         'tms_id': tms_id
     }
-    sony.add_to_favorites(ids)
+
+    fav_type = ''
+    if 'fav_type' in params:
+        fav_type = params['fav_type']
+    sony.add_to_favorites(fav_type, ids)
 
 elif mode == 1002:
     ids ={
@@ -126,7 +130,11 @@ elif mode == 1002:
         'series_id': series_id,
         'tms_id': tms_id
     }
-    sony.remove_from_favorites(ids)
+
+    fav_type = ''
+    if 'fav_type' in params:
+        fav_type = params['fav_type']
+    sony.remove_from_favorites(fav_type, ids)
 
 
 if mode is not None and mode != 800 and mode != 750:

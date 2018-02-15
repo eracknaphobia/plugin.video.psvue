@@ -289,7 +289,7 @@ class SONY():
         self.addon.setSetting(id='default_profile', value=profile_id)
 
 
-    def add_to_favorites(self, ids):
+    def add_to_favorites(self, fav_type, ids):
         url = self.user_action_url+'/favorite'
         headers = {"Accept": "*/*",
                    "Content-type": "application/json",
@@ -303,7 +303,7 @@ class SONY():
                    "X-Requested-With": "com.snei.vue.atv"
                    }
 
-        if ids['channel_id'] != 'null':
+        if fav_type == 'channel':
             location = self.addon.getLocalizedString(30102)
             payload = '{"channel_id":'+ids['channel_id']+'}'
         else:
@@ -318,7 +318,7 @@ class SONY():
             self.notification_msg("Fail", "Not added")
 
 
-    def remove_from_favorites(self,ids):
+    def remove_from_favorites(self, fav_type, ids):
         url = self.user_action_url+'/favorite'
         headers = {"Accept": "*/*",
                    "Content-type": "application/json",
@@ -332,7 +332,7 @@ class SONY():
                    "X-Requested-With": "com.snei.vue.atv"
                    }
 
-        if ids['channel_id'] != 'null':
+        if fav_type == 'channel':
             location = self.addon.getLocalizedString(30102)
             payload = '{"channel_id":'+ids['channel_id']+'}'
         else:
