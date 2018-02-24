@@ -276,7 +276,10 @@ def list_episode(show):
     if 'last_timecode' in show['airings'][0]:
         resumetime = str(show['airings'][0]['last_timecode'])
         xbmc.log("RESUME TIME = "+resumetime)
-        h,m,s = resumetime.split(':')
+        try:
+            h,m,s = resumetime.split(':')
+        except ValueError:
+            h,m,s,ms = resumetime.split(':')
         resumetime = str(int(h) * 3600 + int(m) * 60 + int(s))
 
     # xbmc.log("RESUME TIME IN Seconds = "+resumetime)
