@@ -180,8 +180,10 @@ def list_show(show):
 
     if str(show['airings'][0]['badge']) == 'live':
         add_stream(name, channel_url, icon, fanart, info, properties, show_info)
+        add_sort_methods(int(sys.argv[1])
     else:
         add_show(title, 150, icon, fanart, info, show_info)
+        add_sort_methods(addon_handle)
 
 
 def list_episodes(program_id):
@@ -562,6 +564,9 @@ def add_dir(name, mode, icon, fanart=None, channel_id=None):
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
 
+def add_sort_methods(handle):
+    xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_TITLE_IGNORE_THE)
+    xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_UNSORTED)
 
 def add_show(name, mode, icon, fanart, info, show_info):
     u = sys.argv[0] + "?mode=" + str(mode)
