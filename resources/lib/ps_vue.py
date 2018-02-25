@@ -182,6 +182,8 @@ def list_show(show):
         add_stream(name, channel_url, icon, fanart, info, properties, show_info)
     else:
         add_show(title, 150, icon, fanart, info, show_info)
+        
+    add_sort_methods(addon_handle)
 
 
 def list_episodes(program_id):
@@ -562,6 +564,9 @@ def add_dir(name, mode, icon, fanart=None, channel_id=None):
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
 
+def add_sort_methods(handle):
+    xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_TITLE_IGNORE_THE)
+    xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_UNSORTED)
 
 def add_show(name, mode, icon, fanart, info, show_info):
     u = sys.argv[0] + "?mode=" + str(mode)
@@ -611,7 +616,7 @@ def add_stream(name, link_url, icon, fanart, info=None, properties=None, show_in
             ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')')
         ]
         liz.addContextMenuItems(context_items)
-    ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
+    ok = xbmcplugin.addDirectoryItem(handle=addon_handle, url=u, listitem=liz, isFolder=False)
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
 
