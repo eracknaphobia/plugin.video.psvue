@@ -21,6 +21,7 @@ def main_menu():
     if ADDON.getSetting(id='featured_visible') == 'true': add_dir(LOCAL_STRING(30107), 700, ICON)
     if ADDON.getSetting(id='search_visible') == 'true': add_dir(LOCAL_STRING(30211), 750, ICON)
 
+
 def all_channels():
     json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/500')
     list_channels(json_source['body']['items'])
@@ -28,6 +29,7 @@ def all_channels():
 
 def next_airings():
     list_next_airings()
+
 
 def my_shows():
     json_source = get_json(EPG_URL + '/browse/items/favorites/filter/shows/sort/title/offset/0/size/500')
@@ -50,12 +52,12 @@ def on_demand(channel_id):
 
 
 def sports():
-    json_source = get_json(EPG_URL + '/programs?size=10&offset=0&filter=ds-sports')
+    json_source = get_json(EPG_URL + '/programs?size=100&offset=0&filter=ds-sports')
     list_shows(json_source['body']['items'])
 
 
 def kids():
-    json_source = get_json(EPG_URL + '/programs?size=10&offset=0&filter=ds-kids')
+    json_source = get_json(EPG_URL + '/programs?size=100&offset=0&filter=ds-kids')
     list_shows(json_source['body']['items'])
 
 
@@ -94,12 +96,12 @@ def list_next_airings():
         sys.exit()
 
     channel_id = channel_dict[channel_list[ret]]
-    #Json information from live and upcoming timeline for specified channel
-    #Max upcoming shows display is 10
+    # Json information from live and upcoming timeline for specified channel
+    # Max upcoming shows display is 10
     json_source = get_json(EPG_URL + '/timeline/live/' + channel_id + '/watch_history_size/0/coming_up_size/20')
 
-    #Sort live and upcoming episodes on selected channel
-    #Some channels (not many) do not load any live or upcoming info. This is a Sony server issue.
+    # Sort live and upcoming episodes on selected channel
+    # Some channels (not many) do not load any live or upcoming info. This is a Sony server issue.
     for strand in json_source['body']['strands']:
         if strand['id'] == 'now_playing':
             icon = ICON
@@ -160,31 +162,32 @@ def list_show(show):
         'title': title,
         'originaltitle': title,
         'genre': genre
-           }
+   }
         
     show_info = {
-            'airing_id': airing_id,
-            'channel_id': channel_id,
-            'program_id': program_id,
-            'series_id': series_id,
-            'tms_id': tms_id
-                }
+        'airing_id': airing_id,
+        'channel_id': channel_id,
+        'program_id': program_id,
+        'series_id': series_id,
+        'tms_id': tms_id
+    }
 
     properties = {
-            'IsPlayable': 'true'
-                 }
+        'IsPlayable': 'true'
+     }
 
     channel_url = CHANNEL_URL + '/' + channel_id
 
     if str(show['airings'][0]['badge']) == 'live':
         add_stream(name, channel_url, icon, fanart, info, properties, show_info)
-
     else:
         add_show(title, 150, icon, fanart, info, show_info)
+        
+    add_sort_methods(addon_handle)
 
 
 def list_episodes(program_id):
-    url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/75'
+    url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/500'
     
     json_source = get_json(url)
     
@@ -241,6 +244,7 @@ def list_episode(show):
     broadcast_date = airing_date
     if 'broadcast_date' in show:
         broadcast_date = show['broadcast_date']
+        xbmc.log(str(broadcast_date))
         broadcast_date = string_to_date(broadcast_date, "%Y-%m-%dT%H:%M:%S.%fZ")
         broadcast_date = utc_to_local(broadcast_date)
 
@@ -268,18 +272,20 @@ def list_episode(show):
     elif str(show['airings'][0]['badge']) == 'live':
         name = title
         channel_name = channel_name + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
-    
 
     # Add resumetime if applicable
     resumetime=''
     if 'last_timecode' in show['airings'][0]:
         resumetime = str(show['airings'][0]['last_timecode'])
         xbmc.log("RESUME TIME = "+resumetime)
-        h,m,s = resumetime.split(':')
+        try:
+            h,m,s = resumetime.split(':')
+        except ValueError:
+            h,m,s,ms = resumetime.split(':')
         resumetime = str(int(h) * 3600 + int(m) * 60 + int(s))
 
-    #xbmc.log("RESUME TIME IN Seconds = "+resumetime)
-    #xbmc.log("TOTAL TIME IN Seconds = "+str(int(duration.total_seconds())))
+    # xbmc.log("RESUME TIME IN Seconds = "+resumetime)
+    # xbmc.log("TOTAL TIME IN Seconds = "+str(int(duration.total_seconds())))
     
     show_url = SHOW_URL + '/' + airing_id
     
@@ -313,7 +319,7 @@ def list_episode(show):
         'tms_id': tms_id,
         'title': title,
         'plot': plot
-}
+    }
     
     add_stream(name, show_url, icon, fanart, info, properties, show_info)
 
@@ -335,12 +341,8 @@ def list_channel(channel):
     airing_id = ''
     program_id = ''
     series_id = ''
-    genre = ''
     tms_id = ''
-    plot = ''
-    season = ''
-    episode = ''
-    
+
     if 'id' in channel and 'sub_item' in channel:
         if 'airings' in channel['sub_item'] and channel['sub_item']['airings']:
             air_dict = {}
@@ -355,10 +357,6 @@ def list_channel(channel):
         if 'id' in channel['sub_item']: program_id = str(channel['sub_item']['id'])
         if 'series_id' in channel['sub_item']: series_id = str(channel['sub_item']['series_id'])
         tms_id = str(channel['sub_item']['tms_id'])
-        if 'item' in channel: genre = str(channel['sub_item']['genres'])
-        plot = get_dict_item('synopsis', channel['sub_item'])
-        season = get_dict_item('season_num', channel['sub_item'])
-        episode = get_dict_item('episode_num', channel['sub_item'])
 
     if 'channel' in channel:
         title = channel['channel']['name']
@@ -366,38 +364,40 @@ def list_channel(channel):
     else:
         title = channel['title']
         channel_id = str(channel['id'])
-    
-    genre = ''
-    if 'item' in channel: genre = str(channel['sub_item']['genres'])
-    
+
     plot = get_dict_item('synopsis', channel['sub_item'])
     season = get_dict_item('season_num', channel['sub_item'])
     episode = get_dict_item('episode_num', channel['sub_item'])
 
+    genre = ''
+    for item in (channel['sub_item']['genres']):
+        if genre != '': genre += ', '
+        genre += item['genre']
+
     channel_url = CHANNEL_URL + '/' + channel_id
     
     info = {
-            'season':season,
-            'episode':episode,
-            'plot': plot,
-            'title': title,
-            'originaltitle': title,
-            'genre': genre
-        }
+        'season':season,
+        'episode':episode,
+        'plot': plot,
+        'title': title,
+        'originaltitle': title,
+        'genre': genre
+    }
         
     properties = {
-            'IsPlayable': 'true'
-                }
+        'IsPlayable': 'true'
+    }
         
     show_info = {
-            'airing_id': airing_id,
-            'channel_id': channel_id,
-            'program_id': program_id,
-            'series_id': series_id,
-            'tms_id': tms_id,
-            'title': title,
-            'icon': icon
-                }
+        'airing_id': airing_id,
+        'channel_id': channel_id,
+        'program_id': program_id,
+        'series_id': series_id,
+        'tms_id': tms_id,
+        'title': title,
+        'icon': icon
+    }
 
     if get_dict_item('channel_type',channel) == 'vod':
         add_dir(title, 350, icon, fanart, channel_id)
@@ -413,17 +413,18 @@ def get_dict_item(key, dictionary):
 
 
 def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon):
-    headers = {'Accept': '*/*',
-               'Content-type': 'application/x-www-form-urlencoded',
-               'Origin': 'https://vue.playstation.com',
-               'Accept-Language': 'en-US,en;q=0.8',
-               'Referer': 'https://vue.playstation.com/watch/live',
-               'Accept-Encoding': 'gzip, deflate, br',
-               'User-Agent': UA_ANDROID_TV,
-               'Connection': 'Keep-Alive',
-               'Host': 'media-framework.totsuko.tv',
-               'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
-               'X-Requested-With': 'com.snei.vue.android'
+    headers = {
+        'Accept': '*/*',
+        'Content-type': 'application/x-www-form-urlencoded',
+        'Origin': 'https://vue.playstation.com',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Referer': 'https://vue.playstation.com/watch/live',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'User-Agent': UA_ANDROID_TV,
+        'Connection': 'Keep-Alive',
+        'Host': 'media-framework.totsuko.tv',
+        'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
+        'X-Requested-With': 'com.snei.vue.android'
     }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
@@ -461,37 +462,40 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     # Seek to time
 
-    #Give the stream sometime to start before checking
+    # Give the stream sometime to start before checking
     monitor = xbmc.Monitor()
     monitor.waitForAbort(10)
     watched = 'false'
-    playTime = 0
+    play_time = 0
+    mark_watched = -1
     xbmc.log("Is playing video? " + str(xbmc.Player().isPlayingVideo()))
     while xbmc.Player().isPlayingVideo() and not monitor.abortRequested():
         xbmc.log("Still playing...")
-        playTime = str(xbmc.Player().getTime())#Get timestamp of video from VideoPlayer to save as resume time
-        mark_watched = xbmc.Player().getTotalTime()#Get the total time of video playing
+        play_time = str(xbmc.Player().getTime())  # Get timestamp of video from VideoPlayer to save as resume time
+        mark_watched = xbmc.Player().getTotalTime()  # Get the total time of video playing
         monitor.waitForAbort(3)
     xbmc.log("We're done, write info back to ps servers!!!")
-    IntTime = int(float(playTime))#Convert VideoPlayer seconds from float to int
-    res_time = time.strftime("%H:%M:%S", time.gmtime(IntTime))#Convert seconds to 00:00:00 resume time
+    int_time = int(float(play_time))  # Convert VideoPlayer seconds from float to int
+    res_time = time.strftime("%H:%M:%S", time.gmtime(int_time))  # Convert seconds to 00:00:00 resume time
     cur_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S:%SZ")
 
-    if mark_watched - IntTime <= 120: #Mark video as watched if less than 2 minutes are left
+    if 0 < (mark_watched - int_time) <= 120:  # Mark video as watched if less than 2 minutes are left
         watched = 'true'
 
     sony = SONY()
     sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id, res_time, cur_time, watched)
-    
+
+
 def get_json(url):
-    headers = {'Accept': '*/*',
-               'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
-               'User-Agent': UA_ANDROID_TV,
-               'Accept-Encoding': 'gzip, deflate, br',
-               'Accept-Language': 'en-US,en;q=0.5',
-               'X-Requested-With': 'com.snei.vue.android',
-               'Connection': 'keep-alive'
-              }
+    headers = {
+        'Accept': '*/*',
+        'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
+        'User-Agent': UA_ANDROID_TV,
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'X-Requested-With': 'com.snei.vue.android',
+        'Connection': 'keep-alive'
+    }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
 
@@ -545,6 +549,7 @@ def create_device_id():
 def utc_to_local(utc_dt):
     # get integer timestamp to avoid precision lost
     timestamp = calendar.timegm(utc_dt.timetuple())
+    #local_dt = datetime(1970, 1, 1) + timedelta(seconds=timestamp)
     local_dt = datetime.fromtimestamp(timestamp)
     assert utc_dt.resolution >= timedelta(microseconds=1)
     return local_dt.replace(microsecond=utc_dt.microsecond)
@@ -560,6 +565,9 @@ def add_dir(name, mode, icon, fanart=None, channel_id=None):
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
 
+def add_sort_methods(handle):
+    xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_TITLE_IGNORE_THE)
+    xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_UNSORTED)
 
 def add_show(name, mode, icon, fanart, info, show_info):
     u = sys.argv[0] + "?mode=" + str(mode)
@@ -569,38 +577,47 @@ def add_show(name, mode, icon, fanart, info, show_info):
     if fanart is None: fanart = FANART
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
     liz.setInfo(type="Video", infoLabels=info)
-    show_values =''
+    show_values = ''
     for key, value in show_info.iteritems():
         show_values += '&' + key + '=' + value
 
-    context_items = [('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001'+show_values+')'),
-                     ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002'+show_values+')')]
+    context_items = [
+        ('Add To Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=channel' + show_values + ')'),
+        ('Remove From Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=channel' + show_values + ')'),
+        ('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
+        ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')')
+    ]
     liz.addContextMenuItems(context_items)
     ok = xbmcplugin.addDirectoryItem(handle=addon_handle, url=u, listitem=liz, isFolder=True)
     xbmcplugin.setContent(addon_handle, 'tvshows')
 
 
 def add_stream(name, link_url, icon, fanart, info=None, properties=None, show_info=None):
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url) + "&mode=" + str(900)
-    #xbmc.log(str(info))
+    u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url)
     liz = xbmcgui.ListItem(name)
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
     if info is not None: liz.setInfo(type="Video", infoLabels=info)
     if properties is not None:
         for key, value in properties.iteritems():
             liz.setProperty(key,value)
-    xbmc.log(str(show_info))
+        if 'IsPlayable' in properties and properties['IsPlayable'] == 'false':
+            u += "&mode=" + str(998)
+        else:
+            u += "&mode=" + str(900)
+
     if show_info is not None:
-        show_values =''
+        show_values = ''
         for key, value in show_info.iteritems():
             show_values += '&' + key + '=' + value
         u += show_values
-        if len(show_info) == 1:
-            #Only add this option for channels not episodes
-            context_items = [('Add To Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001'+show_values+')'),
-                             ('Remove From Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002'+show_values+')')]
-            liz.addContextMenuItems(context_items)
-    ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
+        context_items = [
+            ('Add To Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=channel'+show_values+')'),
+            ('Remove From Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=channel'+show_values+')'),
+            ('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
+            ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')')
+        ]
+        liz.addContextMenuItems(context_items)
+    ok = xbmcplugin.addDirectoryItem(handle=addon_handle, url=u, listitem=liz, isFolder=False)
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
 
@@ -622,6 +639,7 @@ def get_params():
                 param[splitparams[0]] = splitparams[1]
 
     return param
+
 
 def check_device_id():
     device_id = ADDON.getSetting(id='deviceId')
