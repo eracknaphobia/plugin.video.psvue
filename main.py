@@ -99,6 +99,7 @@ elif mode == 900:
 
 elif mode == 901:
     build_playlist()
+    main_menu()
 
 elif mode == 902:
     epg_play_stream(url)

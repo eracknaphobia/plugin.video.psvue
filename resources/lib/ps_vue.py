@@ -674,8 +674,9 @@ def build_playlist():
     xmltv_file = open(os.path.join(ADDON_PATH_PROFILE, "epg.xml"),"w")
     xmltv_file.write('<?xml version="1.0" encoding="utf-8" ?>\n')
     xmltv_file.write("<tv>\n")
-
+    channel_list = []
     for channel in json_source['body']['items']:
+
         logo = None
         for image in channel['urls']:
             if 'width' in image:
@@ -685,10 +686,10 @@ def build_playlist():
                     logo = logo.encode('utf-8')
                     break
 
-
         title = channel['title']
         title = title.encode('utf-8')
         channel_id = str(channel['id'])
+        channel_list.append(channel_id)
         xbmc.log(title)
         xbmc.log(channel_id)
         xbmc.log(str(logo))
@@ -707,9 +708,74 @@ def build_playlist():
         xmltv_file.write('    <display-name lang="en">'+title+'</display-name>\n')
         xmltv_file.write('</channel>\n')
 
+    for channel_id in channel_list:
+        build_epg(channel_id, xmltv_file)
+
     xmltv_file.write('</tv>\n')
     m3u_file.close()
     xmltv_file.close()
+
+
+def build_epg(channel_id, xmltv_file):
+    """
+    <?xml version="1.0" encoding="utf-8" ?>
+    <tv>
+      <channel id="id1">
+          <display-name lang="en">Channel 1</display-name>
+      </channel>
+      <channel id="id2">
+          <display-name lang="en">Channel 2</display-name>
+      </channel>
+    ...
+      <programme start="20130215080000 +0100" stop="20130215081500 +0100" channel="id1">
+          <title lang="en">News</title>
+      </programme>
+      <programme start="20130215080500 +0100" stop="20130215083500 +0100" channel="id2">
+          <title lang="en">Movie</title>
+      </programme>
+
+       <programme start="20080715023000 -0600" stop="20080715040000 -0600" channel="I10436.labs.zap2it.com">
+            <title lang="en">Mystery!</title>
+            <sub-title lang="en">Foyle's War, Series IV: Casualties of War</sub-title>
+            <desc lang="en">The murder of a prominent scientist may have been due to a gambling debt.</desc>
+            <date>20070708</date>
+            <category lang="en">Anthology</category>
+            <category lang="en">Mystery</category>
+            <category lang="en">Series</category>
+            <episode-num system="dd_progid">EP00003026.0666</episode-num>
+            <episode-num system="onscreen">2706</episode-num>
+            <audio>
+              <stereo>stereo</stereo>
+            </audio>
+            <previously-shown start="20070708000000" />
+            <subtitles type="teletext" />
+        </programme>
+    ...
+    </tv>
+    title = "test " + channel_id
+    xmltv_file.write('<programme start="20170315160000 -0500" stop="20190315170000 -0500" channel="' + channel_id + '">\n')
+    xmltv_file.write('    <title lang="en">' + title + '</title>\n')
+    xmltv_file.write('</programme>\n')
+    """
+    json_source = get_json(EPG_URL + '/timeline/live/' + channel_id + '/watch_history_size/0/coming_up_size/20')
+    for strand in json_source['body']['strands']:
+        if strand['id'] == 'now_playing' or strand['id'] == 'coming_up':
+            icon = ""
+            for program in strand['programs']:
+                for image in program['channel']['urls']:  # Display Channel icon
+                    if 'width' in image:
+                        if image['width'] == 600 or image['width'] == 440: icon = image['src']
+                        if icon != ICON: break
+                title = program['title']
+                title = title.encode('utf-8')
+                start_time = string_to_date(program['airing_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
+                start_time = start_time.strftime("%Y%m%d%H%M%S")
+                stop_time = string_to_date(program['expiration_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
+                stop_time = stop_time.strftime("%Y%m%d%H%M%S")
+
+                xmltv_file.write('<programme start="'+start_time+' -0500" stop="'+stop_time+'  -0500" channel="' + channel_id + '">\n')
+                xmltv_file.write('    <title lang="en">'+title+'</title>\n')
+                xmltv_file.write('</programme>\n')
 
 
 def epg_play_stream(url):
@@ -735,7 +801,22 @@ def epg_play_stream(url):
     headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
     stream_url += headers
 
+    # window_id = xbmcgui.getCurrentWindowId()
     xbmc.executebuiltin('PlayMedia('+stream_url+',True,0)')
+    # EPG GUIDE FULL SCREEN ID 10702
+    """
+    tvchannels      WINDOW_TV_CHANNELS	10700	700	MyPVRChannels.xml
+    tvrecordings	WINDOW_TV_RECORDINGS	10701	701	MyPVRRecordings.xml
+    tvguide	        WINDOW_TV_GUIDE	10702	702	MyPVRGuide.xml
+    tvtimers        WINDOW_TV_TIMERS	10703	703	MyPVRTimers.xml
+    tvsearch	WINDOW_TV_SEARCH	10704	704	MyPVRSearch.xml
+    radiochannels	WINDOW_RADIO_CHANNELS	10705	705	MyPVRChannels.xml
+    radiorecordings	WINDOW_RADIO_RECORDINGS	10706	706	MyPVRRecordings.xml
+    radioguide	WINDOW_RADIO_GUIDE	10707	707	MyPVRGuide.xml
+    radiotimers	WINDOW_RADIO_TIMERS	10708	708	MyPVRTimers.xml
+    radiosearch	WINDOW_RADIO_SEARCH	10709	709	MyPVRSearch.xml
+    tvtimerrules	WINDOW_TV_TIMER_RULES	10710	710	MyPVRTimers.xml
+    """
     xbmc.executebuiltin('ActivateWindow(10702)')
 
 addon_handle = int(sys.argv[1])
