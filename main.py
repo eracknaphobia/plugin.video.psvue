@@ -97,6 +97,12 @@ elif mode == 800:
 elif mode == 900:
     get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
 
+elif mode == 901:
+    build_playlist()
+
+elif mode == 902:
+    epg_play_stream(url)
+
 elif mode == 998:
     sys.exit()
 

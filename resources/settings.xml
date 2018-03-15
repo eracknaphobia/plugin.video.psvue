@@ -25,7 +25,11 @@
   <category label="30212">
     <setting type="action" label="30004" action="RunPlugin(plugin://plugin.video.psvue/?mode=800)" option="close" />
     <setting id="always_ask_profile" type="bool" label="30213" default="false" />
+      <setting type="action" label="Build Playlist" action="RunPlugin(plugin://plugin.video.psvue/?mode=901)" option="close" />
   </category>
+
+  <!--EPG-->
+
 
   <!-- Hidden -->
   <setting id="EPGreqPayload" type="text" default="" visible="false"/>

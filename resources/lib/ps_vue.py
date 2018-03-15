@@ -655,6 +655,62 @@ def check_device_id():
         create_device_id()
 
 
+# -----------------------------------------------------------------------------------------
+# EPG Code
+# Setup
+#  - Build Playlist (PS Vue Addon (Settings/Build Playlist)
+#  - Enable Web Server (Settings/Services/Control/Allow remote control via HTTP)
+#  - Enabled PVR IPTV Simple Client (Addons/My add-ons/PVR Clients)
+#  - Set M3U play Local Path (Home Folder/userdata/addon_data/plugin.video.psvue/playlist.m3u)
+# ------------------------------------------------------------------------------------------
+def build_playlist():
+    json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/500')
+    m3u_file = open(os.path.join(ADDON_PATH_PROFILE, "playlist.m3u"),"w")
+    m3u_file.write("#EXTM3U")
+    m3u_file.write("\n")
+    for channel in json_source['body']['items']:
+        title = channel['title']
+        channel_id = str(channel['id'])
+        url = 'http://localhost:8080/jsonrpc?request='
+        url += urllib.quote('{"jsonrpc":"2.0","method":"Addons.ExecuteAddon","params":{"addonid":"plugin.video.psvue","params":{"mode":"902","url":"'+ CHANNEL_URL + '/' + channel_id + '"}},"id": 1}')
+        m3u_file.write("\n")
+        m3u_file.write("#EXTINF:"+channel_id+","+title.encode('utf-8'))
+        m3u_file.write("\n")
+        m3u_file.write(url)
+        m3u_file.write("\n")
+
+    m3u_file.close()
+
+
+def build_xmltv():
+
+
+def epg_play_stream(url):
+    headers = {
+        'Accept': '*/*',
+        'Content-type': 'application/x-www-form-urlencoded',
+        'Origin': 'https://vue.playstation.com',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Referer': 'https://vue.playstation.com/watch/live',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'User-Agent': UA_ANDROID_TV,
+        'Connection': 'Keep-Alive',
+        'Host': 'media-framework.totsuko.tv',
+        'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
+        'X-Requested-With': 'com.snei.vue.android'
+    }
+
+    r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
+    json_source = r.json()
+    stream_url = json_source['body']['video']
+    headers = '|User-Agent='
+    headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
+    headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
+    stream_url += headers
+
+    xbmc.executebuiltin('PlayMedia('+stream_url+',True,0)')
+    xbmc.executebuiltin('ActivateWindow(10702)')
+
 addon_handle = int(sys.argv[1])
 ADDON = xbmcaddon.Addon()
 ROOTDIR = ADDON.getAddonInfo('path')
