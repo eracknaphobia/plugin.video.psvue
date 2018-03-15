@@ -662,27 +662,54 @@ def check_device_id():
 #  - Enable Web Server (Settings/Services/Control/Allow remote control via HTTP)
 #  - Enabled PVR IPTV Simple Client (Addons/My add-ons/PVR Clients)
 #  - Set M3U play Local Path (Home Folder/userdata/addon_data/plugin.video.psvue/playlist.m3u)
+#  - Set IPTV Channel Logos - Channels Logos from XMLTV prefer M3U
 # ------------------------------------------------------------------------------------------
 def build_playlist():
     json_source = get_json(EPG_URL + '/browse/items/channels/filter/all/sort/channeltype/offset/0/size/500')
+
     m3u_file = open(os.path.join(ADDON_PATH_PROFILE, "playlist.m3u"),"w")
     m3u_file.write("#EXTM3U")
     m3u_file.write("\n")
+
+    xmltv_file = open(os.path.join(ADDON_PATH_PROFILE, "epg.xml"),"w")
+    xmltv_file.write('<?xml version="1.0" encoding="utf-8" ?>\n')
+    xmltv_file.write("<tv>\n")
+
     for channel in json_source['body']['items']:
+        logo = None
+        for image in channel['urls']:
+            if 'width' in image:
+                xbmc.log(str(image['width']))
+                if image['width'] == 600 or image['width'] == 440:
+                    logo = image['src']
+                    logo = logo.encode('utf-8')
+                    break
+
+
         title = channel['title']
+        title = title.encode('utf-8')
         channel_id = str(channel['id'])
+        xbmc.log(title)
+        xbmc.log(channel_id)
+        xbmc.log(str(logo))
+
         url = 'http://localhost:8080/jsonrpc?request='
-        url += urllib.quote('{"jsonrpc":"2.0","method":"Addons.ExecuteAddon","params":{"addonid":"plugin.video.psvue","params":{"mode":"902","url":"'+ CHANNEL_URL + '/' + channel_id + '"}},"id": 1}')
-        m3u_file.write("\n")
-        m3u_file.write("#EXTINF:"+channel_id+","+title.encode('utf-8'))
-        m3u_file.write("\n")
-        m3u_file.write(url)
-        m3u_file.write("\n")
+        url += urllib.quote('{"jsonrpc":"2.0","method":"Addons.ExecuteAddon","params":{"addonid":"plugin.video.psvue","params":{"mode":"902","url":"' + CHANNEL_URL + '/' + channel_id + '"}},"id": 1}')
 
+        m3u_file.write("\n")
+        channel_info = '#EXTINF:-1 tvg-id="'+channel_id+'" tvg-name="' + title + '"'
+        if logo is not None: channel_info += ' tvg-logo="'+logo+'"'
+        channel_info += ' group_title="PS Vue",' + title
+        m3u_file.write(channel_info+"\n")
+        m3u_file.write(url+"\n")
+
+        xmltv_file.write('<channel id="'+channel_id+'">\n')
+        xmltv_file.write('    <display-name lang="en">'+title+'</display-name>\n')
+        xmltv_file.write('</channel>\n')
+
+    xmltv_file.write('</tv>\n')
     m3u_file.close()
-
-
-def build_xmltv():
+    xmltv_file.close()
 
 
 def epg_play_stream(url):
