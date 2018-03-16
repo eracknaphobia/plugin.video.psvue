@@ -180,3 +180,11 @@ msgstr ""
 msgctxt "#30224"
 msgid "All Channels"
 msgstr ""
+
+msgctxt "#30300"
+msgid "EPG"
+msgstr ""
+
+msgctxt "#30301"
+msgid "Build Playlist"
+msgstr ""

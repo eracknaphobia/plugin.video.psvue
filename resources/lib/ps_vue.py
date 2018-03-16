@@ -676,37 +676,33 @@ def build_playlist():
     xmltv_file.write("<tv>\n")
     channel_list = []
     for channel in json_source['body']['items']:
-
-        logo = None
-        for image in channel['urls']:
-            if 'width' in image:
-                xbmc.log(str(image['width']))
-                if image['width'] == 600 or image['width'] == 440:
-                    logo = image['src']
-                    logo = logo.encode('utf-8')
-                    break
-
         title = channel['title']
-        title = title.encode('utf-8')
-        channel_id = str(channel['id'])
-        channel_list.append(channel_id)
-        xbmc.log(title)
-        xbmc.log(channel_id)
-        xbmc.log(str(logo))
+        if 'ondemand' not in title.lower():
+            title = title.encode('utf-8')
+            channel_id = str(channel['id'])
+            channel_list.append(channel_id)
+            logo = None
+            for image in channel['urls']:
+                if 'width' in image:
+                    xbmc.log(str(image['width']))
+                    if image['width'] == 600 or image['width'] == 440:
+                        logo = image['src']
+                        logo = logo.encode('utf-8')
+                        break
 
-        url = 'http://localhost:8080/jsonrpc?request='
-        url += urllib.quote('{"jsonrpc":"2.0","method":"Addons.ExecuteAddon","params":{"addonid":"plugin.video.psvue","params":{"mode":"902","url":"' + CHANNEL_URL + '/' + channel_id + '"}},"id": 1}')
+            url = 'http://localhost:8080/jsonrpc?request='
+            url += urllib.quote('{"jsonrpc":"2.0","method":"Addons.ExecuteAddon","params":{"addonid":"plugin.video.psvue","params":{"mode":"902","url":"' + CHANNEL_URL + '/' + channel_id + '"}},"id": 1}')
 
-        m3u_file.write("\n")
-        channel_info = '#EXTINF:-1 tvg-id="'+channel_id+'" tvg-name="' + title + '"'
-        if logo is not None: channel_info += ' tvg-logo="'+logo+'"'
-        channel_info += ' group_title="PS Vue",' + title
-        m3u_file.write(channel_info+"\n")
-        m3u_file.write(url+"\n")
+            m3u_file.write("\n")
+            channel_info = '#EXTINF:-1 tvg-id="'+channel_id+'" tvg-name="' + title + '"'
+            if logo is not None: channel_info += ' tvg-logo="'+logo+'"'
+            channel_info += ' group_title="PS Vue",' + title
+            m3u_file.write(channel_info+"\n")
+            m3u_file.write(url+"\n")
 
-        xmltv_file.write('<channel id="'+channel_id+'">\n')
-        xmltv_file.write('    <display-name lang="en">'+title+'</display-name>\n')
-        xmltv_file.write('</channel>\n')
+            xmltv_file.write('<channel id="'+channel_id+'">\n')
+            xmltv_file.write('    <display-name lang="en">'+title+'</display-name>\n')
+            xmltv_file.write('</channel>\n')
 
     for channel_id in channel_list:
         build_epg(channel_id, xmltv_file)
