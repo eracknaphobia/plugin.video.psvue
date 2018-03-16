@@ -677,7 +677,7 @@ def build_playlist():
     channel_list = []
     for channel in json_source['body']['items']:
         title = channel['title']
-        if 'ondemand' not in title.lower():
+        if channel['channel_type'] == 'linear':
             title = title.encode('utf-8')
             channel_id = str(channel['id'])
             channel_list.append(channel_id)
@@ -710,6 +710,10 @@ def build_playlist():
     xmltv_file.write('</tv>\n')
     m3u_file.close()
     xmltv_file.close()
+
+    dialog = xbmcgui.Dialog()
+    msg = 'EPG Done Building'
+    dialog.notification('EPG Finished', msg, xbmcgui.NOTIFICATION_INFO, 3000)
 
 
 def build_epg(channel_id, xmltv_file):
@@ -756,21 +760,39 @@ def build_epg(channel_id, xmltv_file):
     json_source = get_json(EPG_URL + '/timeline/live/' + channel_id + '/watch_history_size/0/coming_up_size/20')
     for strand in json_source['body']['strands']:
         if strand['id'] == 'now_playing' or strand['id'] == 'coming_up':
-            icon = ""
             for program in strand['programs']:
-                for image in program['channel']['urls']:  # Display Channel icon
+                icon = ""
+                for image in program['urls']:
                     if 'width' in image:
-                        if image['width'] == 600 or image['width'] == 440: icon = image['src']
-                        if icon != ICON: break
+                        if image['width'] == 600 or image['width'] == 440:
+                            icon = image['src']
+                            break
+
                 title = program['title']
                 title = title.encode('utf-8')
+                sub_title = ''
+                if 'title_sub' in program:
+                    sub_title = program['title_sub']
+                    sub_title = sub_title.encode('utf-8')
+                desc = ''
+                if 'synopsis' in program:
+                    desc = program['synopsis']
+                    desc = desc.encode('utf-8')
                 start_time = string_to_date(program['airing_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
                 start_time = start_time.strftime("%Y%m%d%H%M%S")
                 stop_time = string_to_date(program['expiration_date'], "%Y-%m-%dT%H:%M:%S.%fZ")
                 stop_time = stop_time.strftime("%Y%m%d%H%M%S")
 
-                xmltv_file.write('<programme start="'+start_time+' -0500" stop="'+stop_time+'  -0500" channel="' + channel_id + '">\n')
-                xmltv_file.write('    <title lang="en">'+title+'</title>\n')
+                xmltv_file.write('<programme start="' + start_time + '" stop="' + stop_time + '" channel="' + channel_id + '">\n')
+                xmltv_file.write('    <title lang="en">' + title + '</title>\n')
+                xmltv_file.write('    <sub-title lang="en">' + sub_title + '</sub-title>\n')
+                xmltv_file.write('    <desc lang="en">'+desc+'</desc>\n')
+                for item in program['genres']:
+                    genre = item['genre']
+                    genre = genre.encode('utf-8')
+                    xmltv_file.write('    <category lang="en">'+genre+'</category>\n')
+
+                xmltv_file.write('    <icon src="'+icon+'"/>\n')
                 xmltv_file.write('</programme>\n')
 
 
@@ -813,6 +835,7 @@ def epg_play_stream(url):
     radiosearch	WINDOW_RADIO_SEARCH	10709	709	MyPVRSearch.xml
     tvtimerrules	WINDOW_TV_TIMER_RULES	10710	710	MyPVRTimers.xml
     """
+    main_menu()
     xbmc.executebuiltin('ActivateWindow(10702)')
 
 addon_handle = int(sys.argv[1])
