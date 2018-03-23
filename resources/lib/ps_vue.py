@@ -548,7 +548,6 @@ def create_device_id():
 
 
 def utc_to_local(utc_dt):
-    # get integer timestamp to avoid precision lost
     offset = datetime.now() - datetime.utcnow()
     local_dt = utc_dt + offset + timedelta(seconds=1)
     return local_dt
@@ -564,9 +563,11 @@ def add_dir(name, mode, icon, fanart=None, channel_id=None):
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
 
+
 def add_sort_methods(handle):
     xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_TITLE_IGNORE_THE)
     xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_UNSORTED)
+
 
 def add_show(name, mode, icon, fanart, info, show_info):
     u = sys.argv[0] + "?mode=" + str(mode)
