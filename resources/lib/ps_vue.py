@@ -440,11 +440,11 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem = xbmcgui.ListItem(title, plot, thumbnailImage=icon)
         listitem.setInfo(type="Video", infoLabels={'title': title, 'plot': plot})
         listitem.setMimeType("application/x-mpegURL")
-
     else:
         listitem = xbmcgui.ListItem()
         listitem.setMimeType("application/x-mpegURL")
 
+        
     if ADDON.getSetting(id='inputstream') == 'true' and xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
         stream_url = json_source['body']['video_alt']
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
@@ -460,7 +460,6 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     
     else:
         stream_url += headers
-
 
     listitem.setPath(stream_url)
 
@@ -553,7 +552,6 @@ def create_device_id():
 
 
 def utc_to_local(utc_dt):
-    # get integer timestamp to avoid precision lost
     offset = datetime.now() - datetime.utcnow()
     local_dt = utc_dt + offset + timedelta(seconds=1)
     return local_dt
@@ -569,9 +567,11 @@ def add_dir(name, mode, icon, fanart=None, channel_id=None):
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
 
+
 def add_sort_methods(handle):
     xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_TITLE_IGNORE_THE)
     xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_UNSORTED)
+
 
 def add_show(name, mode, icon, fanart, info, show_info):
     u = sys.argv[0] + "?mode=" + str(mode)
