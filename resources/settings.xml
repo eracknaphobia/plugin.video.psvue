@@ -12,6 +12,7 @@
     <setting id="recent_visible" type="bool" label="30220" default="true" />
     <setting id="featured_visible" type="bool" label="30221" default="true" />
     <setting id="search_visible" type="bool" label="30222" default="true" />
+    <setting id="inputstream" type="bool" label="30225" default="false" />
 
   </category>
     <!--Login-->
