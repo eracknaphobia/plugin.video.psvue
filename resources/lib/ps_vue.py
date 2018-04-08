@@ -429,7 +429,13 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
     json_source = r.json()
-    stream_url = json_source['body']['video']
+    stream_url = ''
+
+    if ADDON.getSetting(id='inputstream') == 'false':
+        stream_url = json_source['body']['video']
+    elif ADDON.getSetting(id='inputstream') == 'true':
+        stream_url = json_source['body']['video_alt']
+
     headers = '|User-Agent='
     headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
     headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
@@ -440,18 +446,20 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem = xbmcgui.ListItem(title, plot, thumbnailImage=icon)
         listitem.setInfo(type="Video", infoLabels={'title': title, 'plot': plot})
         listitem.setMimeType("application/x-mpegURL")
+
     else:
         listitem = xbmcgui.ListItem()
         listitem.setMimeType("application/x-mpegURL")
 
     if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
-        stream_url = json_source['body']['video_alt']
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)
         listitem.setProperty('inputstream.adaptive.license_key', headers)
+    
     else:
         stream_url += headers
+
 
     listitem.setPath(stream_url)
 
@@ -544,6 +552,7 @@ def create_device_id():
 
 
 def utc_to_local(utc_dt):
+    # get integer timestamp to avoid precision lost
     offset = datetime.now() - datetime.utcnow()
     local_dt = utc_dt + offset + timedelta(seconds=1)
     return local_dt
@@ -559,11 +568,9 @@ def add_dir(name, mode, icon, fanart=None, channel_id=None):
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
 
-
 def add_sort_methods(handle):
     xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_TITLE_IGNORE_THE)
     xbmcplugin.addSortMethod(handle=handle, sortMethod=xbmcplugin.SORT_METHOD_UNSORTED)
-
 
 def add_show(name, mode, icon, fanart, info, show_info):
     u = sys.argv[0] + "?mode=" + str(mode)
