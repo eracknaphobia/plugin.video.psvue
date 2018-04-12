@@ -212,6 +212,27 @@ def list_episode(show):
     show_title = show['display_title']
     title = show['display_episode_title']
     airing_id = str(show['airings'][0]['airing_id'])
+    '''
+    for airings in show
+        airing_id = str(show['airings'][0]['airing_id'])
+        if show['airings'][1]['airing_id'] != '':
+            air_dict ={}
+            air_list = []
+            count = 0
+            for airing in show['airings']:
+                air_type = airing['type'].encode("utf-8")
+                xbmc.log(str(count) + ' ' + air_type)
+                channel_dict[air_type] = str(count)
+                channel_list.append(air_type)
+                count += 1
+            
+            dialog = xbmcgui.Dialog()
+            choice = dialog.select(LOCAL_STRING(30214), air_list)
+            if choice < 0:
+            sys.exit()
+            
+            video_type = air_dict[air_list[choice]]
+    '''
 
     channel_name = 'null'
     if 'airings' in show:
