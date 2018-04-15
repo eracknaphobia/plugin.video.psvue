@@ -24,6 +24,7 @@
   <category label="30212">
     <setting type="action" label="30004" action="RunPlugin(plugin://plugin.video.psvue/?mode=800)" option="close" />
     <setting id="always_ask_profile" type="bool" label="30213" default="false" />
+    <setting id="inputstream" type="bool" label="30225" default="false"/>
   </category>
 
   <!-- Hidden -->
@@ -33,5 +34,4 @@
   <setting id="deviceId" type="text" default="" visible="false"/>
   <setting id="npsso" type="text" default="" visible="false"/>
   <setting id="default_profile" type="text" default="" visible="false"/>
-  <setting id="inputstream" type="bool" label="30225" default="false" />
 </settings>
