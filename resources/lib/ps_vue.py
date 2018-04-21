@@ -417,7 +417,7 @@ def get_dict_item(key, dictionary):
     else:
         return ''
 
-
+    
 def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon):
     headers = {
         'Accept': '*/*',
@@ -435,13 +435,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
     json_source = r.json()
-    stream_url = ''
-
-    if ADDON.getSetting(id='inputstream') == 'false':
-        stream_url = json_source['body']['video']
-    elif ADDON.getSetting(id='inputstream') == 'true':
-        stream_url = json_source['body']['video_alt']
-
+    stream_url = json_source['body']['video']
     headers = '|User-Agent='
     headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
     headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
@@ -452,20 +446,18 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem = xbmcgui.ListItem(title, plot, thumbnailImage=icon)
         listitem.setInfo(type="Video", infoLabels={'title': title, 'plot': plot})
         listitem.setMimeType("application/x-mpegURL")
-
     else:
         listitem = xbmcgui.ListItem()
         listitem.setMimeType("application/x-mpegURL")
 
     if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
+        stream_url = json_source['body']['video_alt']
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)
         listitem.setProperty('inputstream.adaptive.license_key', headers)
-    
     else:
         stream_url += headers
-
 
     listitem.setPath(stream_url)
 
