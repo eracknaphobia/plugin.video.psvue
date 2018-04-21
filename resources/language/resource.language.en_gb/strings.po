@@ -180,7 +180,3 @@ msgstr ""
 msgctxt "#30224"
 msgid "All Channels"
 msgstr ""
-
-msgctxt "#30225"
-msgid "Force Alternate stream on Inputstream Adaptive"
-msgstr ""
