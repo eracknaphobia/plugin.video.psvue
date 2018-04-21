@@ -12,6 +12,7 @@
     <setting id="recent_visible" type="bool" label="30220" default="true" />
     <setting id="featured_visible" type="bool" label="30221" default="true" />
     <setting id="search_visible" type="bool" label="30222" default="true" />
+
   </category>
     <!--Login-->
     <category label="30000">
@@ -24,7 +25,6 @@
   <category label="30212">
     <setting type="action" label="30004" action="RunPlugin(plugin://plugin.video.psvue/?mode=800)" option="close" />
     <setting id="always_ask_profile" type="bool" label="30213" default="false" />
-    <setting id="inputstream" type="bool" label="30225" default="false"/>
   </category>
 
   <!-- Hidden -->
