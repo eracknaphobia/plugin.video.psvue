@@ -12,6 +12,7 @@
     <setting id="recent_visible" type="bool" label="30220" default="true" />
     <setting id="featured_visible" type="bool" label="30221" default="true" />
     <setting id="search_visible" type="bool" label="30222" default="true" />
+
   </category>
     <!--Login-->
     <category label="30000">
@@ -33,5 +34,4 @@
   <setting id="deviceId" type="text" default="" visible="false"/>
   <setting id="npsso" type="text" default="" visible="false"/>
   <setting id="default_profile" type="text" default="" visible="false"/>
-  <setting id="inputstream" type="bool" label="30225" default="false" />
 </settings>

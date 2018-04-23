@@ -53,7 +53,7 @@ msgid "Next Airings"
 msgstr ""
 
 msgctxt "#30101"
-msgid "My Shows"
+msgid "My DVR"
 msgstr ""
 
 msgctxt "#30102"
@@ -142,7 +142,7 @@ msgid "Choose Channel"
 msgstr ""
 
 msgctxt "#30215"
-msgid "My Shows"
+msgid "My DVR"
 msgstr ""
 
 msgctxt "#30216"
@@ -179,8 +179,4 @@ msgstr ""
 
 msgctxt "#30224"
 msgid "All Channels"
-msgstr ""
-
-msgctxt "#30225"
-msgid "Force Alternate stream on Inputstream Adaptive"
 msgstr ""

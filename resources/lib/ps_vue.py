@@ -213,6 +213,12 @@ def list_episode(show):
     title = show['display_episode_title']
     airing_id = str(show['airings'][0]['airing_id'])
 
+    airing_IDS = len(show['airings'])
+    air_num = 0
+    if airing_IDS > 1:
+        airing_id = str(show['airings'][1]['airing_id'])
+        air_num = 1
+
     channel_name = 'null'
     if 'airings' in show:
         channel_name = str(show['airings'][0]['channel_name'])
@@ -241,13 +247,6 @@ def list_episode(show):
     
     airing_date = utc_to_local(airing_date)
 
-    broadcast_date = airing_date
-    if 'broadcast_date' in show:
-        broadcast_date = show['broadcast_date']
-        xbmc.log(str(broadcast_date))
-        broadcast_date = string_to_date(broadcast_date, "%Y-%m-%dT%H:%M:%S.%fZ")
-        broadcast_date = utc_to_local(broadcast_date)
-
     media_type = 'tvshow'
     if 'movie' in get_dict_item('sentv_type',show).lower():
         media_type = 'movie'
@@ -259,8 +258,13 @@ def list_episode(show):
 
     plot = get_dict_item('synopsis', show)
 
-    if str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE':
-        name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + broadcast_date.strftime('%m/%d/%y') + '   ' + title
+    if str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE' and str(show['is_new']).upper() == 'TRUE':
+        name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '   ' + title + '    ' + '([B][COLOR=FFFFA500]NEW[/COLOR][/B])'
+        channel_name = show['title']
+        show_title = show['display_episode_title']
+
+    elif str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE':
+        name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '   ' + title
         channel_name = show['title']
         show_title = show['display_episode_title']
 
@@ -275,8 +279,8 @@ def list_episode(show):
 
     # Add resumetime if applicable
     resumetime=''
-    if 'last_timecode' in show['airings'][0]:
-        resumetime = str(show['airings'][0]['last_timecode'])
+    if 'last_timecode' in show['airings'][air_num]:
+        resumetime = str(show['airings'][air_num]['last_timecode'])
         xbmc.log("RESUME TIME = "+resumetime)
         try:
             h,m,s = resumetime.split(':')
@@ -296,15 +300,14 @@ def list_episode(show):
         'originaltitle': title,
         'mediatype': media_type,
         'genre': genre,
-        'aired': broadcast_date.strftime('%Y-%m-%d'),
+        'aired': airing_date.strftime('%Y-%m-%d'),
         'duration': str(int(duration.total_seconds())),
         'season': get_dict_item('season_num',show),
         'episode': get_dict_item('episode_num',show),
         'mpaa': age_rating
     }
 
-    if broadcast_date != '': info['premiered'] = broadcast_date.strftime('%Y-%m-%d')
-    
+
     properties = {
         'totaltime': str(int(duration.total_seconds())),
         'resumetime': resumetime,
@@ -411,7 +414,7 @@ def get_dict_item(key, dictionary):
     else:
         return ''
 
-
+    
 def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon):
     headers = {
         'Accept': '*/*',
@@ -429,13 +432,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
     json_source = r.json()
-    stream_url = ''
-
-    if ADDON.getSetting(id='inputstream') == 'false':
-        stream_url = json_source['body']['video']
-    elif ADDON.getSetting(id='inputstream') == 'true':
-        stream_url = json_source['body']['video_alt']
-
+    stream_url = json_source['body']['video']
     headers = '|User-Agent='
     headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
     headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
@@ -446,20 +443,18 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem = xbmcgui.ListItem(title, plot, thumbnailImage=icon)
         listitem.setInfo(type="Video", infoLabels={'title': title, 'plot': plot})
         listitem.setMimeType("application/x-mpegURL")
-
     else:
         listitem = xbmcgui.ListItem()
         listitem.setMimeType("application/x-mpegURL")
 
     if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
+        stream_url = json_source['body']['video_alt']
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)
         listitem.setProperty('inputstream.adaptive.license_key', headers)
-    
     else:
         stream_url += headers
-
 
     listitem.setPath(stream_url)
 
