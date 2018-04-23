@@ -142,7 +142,7 @@ msgid "Choose Channel"
 msgstr ""
 
 msgctxt "#30215"
-msgid "My Shows"
+msgid "My DVR"
 msgstr ""
 
 msgctxt "#30216"
