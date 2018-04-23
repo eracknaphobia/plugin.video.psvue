@@ -247,13 +247,6 @@ def list_episode(show):
     
     airing_date = utc_to_local(airing_date)
 
-    broadcast_date = airing_date
-    if 'broadcast_date' in show:
-        broadcast_date = show['broadcast_date']
-        xbmc.log(str(broadcast_date))
-        broadcast_date = string_to_date(broadcast_date, "%Y-%m-%dT%H:%M:%S.%fZ")
-        broadcast_date = utc_to_local(broadcast_date)
-
     media_type = 'tvshow'
     if 'movie' in get_dict_item('sentv_type',show).lower():
         media_type = 'movie'
@@ -265,8 +258,13 @@ def list_episode(show):
 
     plot = get_dict_item('synopsis', show)
 
-    if str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE':
-        name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + broadcast_date.strftime('%m/%d/%y') + '   ' + title
+    if str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE' and str(show['is_new']).upper() == 'TRUE':
+        name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '   ' + title + '    ' + '([B][COLOR=FFFFA500]NEW[/COLOR][/B])'
+        channel_name = show['title']
+        show_title = show['display_episode_title']
+
+    elif str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE':
+        name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '   ' + title
         channel_name = show['title']
         show_title = show['display_episode_title']
 
@@ -302,15 +300,14 @@ def list_episode(show):
         'originaltitle': title,
         'mediatype': media_type,
         'genre': genre,
-        'aired': broadcast_date.strftime('%Y-%m-%d'),
+        'aired': airing_date.strftime('%Y-%m-%d'),
         'duration': str(int(duration.total_seconds())),
         'season': get_dict_item('season_num',show),
         'episode': get_dict_item('episode_num',show),
         'mpaa': age_rating
     }
 
-    if broadcast_date != '': info['premiered'] = broadcast_date.strftime('%Y-%m-%d')
-    
+
     properties = {
         'totaltime': str(int(duration.total_seconds())),
         'resumetime': resumetime,
