@@ -371,6 +371,8 @@ def list_channel(channel):
     plot = get_dict_item('synopsis', channel['sub_item'])
     season = get_dict_item('season_num', channel['sub_item'])
     episode = get_dict_item('episode_num', channel['sub_item'])
+    show_title = get_dict_item('display_title', channel['sub_item'])
+    plot = show_title.upper() + ':        ' + plot
 
     genre = ''
     for item in (channel['sub_item']['genres']):
@@ -384,7 +386,7 @@ def list_channel(channel):
         'episode':episode,
         'plot': plot,
         'title': title,
-        'originaltitle': title,
+        'originaltitle': show_title,
         'genre': genre
     }
         
