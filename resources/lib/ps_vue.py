@@ -1,5 +1,5 @@
 import sys, os
-import xbmc, xbmcplugin, xbmcgui, xbmcaddon
+import xbmc, xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 import random
 import cookielib, urllib
 import json
@@ -184,6 +184,93 @@ def list_show(show):
         add_show(title, 150, icon, fanart, info, show_info)
         
     add_sort_methods(addon_handle)
+
+
+def export_show(program_id, plot, icon):
+    xbmcgui.Dialog().notification("LIBRARY EXPORT:", "STARTING", xbmcgui.NOTIFICATION_INFO, 5000)
+    url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/500'
+    json_source = get_json(url)
+    json_source = json_source['body']['items']
+    
+    i = 0
+    for show in json_source:
+        title = str(show['display_title'])
+        #Create path to save .strm files
+        path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/')
+        xbmcvfs.mkdir(path)
+        show_path = xbmc.translatePath(path + title + '/')
+        xbmcvfs.mkdir(show_path)
+        
+        if xbmcvfs.exists(path):
+            if get_dict_item('season_num',show) == '':
+                season_num = 0
+            else:
+                season_num = int(get_dict_item('season_num',show))
+            
+            if get_dict_item('episode_num',show) == '':
+                episode_num = i
+                i += 1
+            else:
+                episode_num = int(get_dict_item('episode_num',show))
+            airing_id = str(show['airings'][0]['airing_id'])
+            tms_id = str(show['tms_id'])
+
+            series_id = 'null'
+            if 'series_id' in show:
+                series_id = str(show['series_id'])
+
+            channel_id = 'null'
+            if 'airings' in show:
+                channel_id = str(show['airings'][0]['channel_id'])
+            else:
+                channel_id = str(show['channel']['channel_id'])
+
+            airing_IDS = len(show['airings'])
+            if airing_IDS > 1:
+                airing_id = str(show['airings'][1]['airing_id'])
+
+            episode_url = SHOW_URL + '/' + airing_id
+            episode_url = urllib.quote_plus(episode_url)
+
+            if season_num < 10:
+                season_num = str(season_num)
+                season_prefix = '0' + season_num
+            else:
+                season_prefix = str(season_num)
+
+            if episode_num <10:
+                episode_num = str(episode_num)
+                episode_prefix = '0' + episode_num
+            else:
+                episode_prefix = str(episode_num)
+            #Create .strm file and write information
+            file = 'S' + season_prefix + 'E' + episode_prefix + '.strm'
+            
+            file_path = os.path.join(xbmc.translatePath(show_path),file)
+            f = xbmcvfs.File(file_path, 'w')
+            f.write('plugin://plugin.video.psvue/?mode=900&url=')
+            f.write(episode_url)
+            f.write('&plot=')
+            f.write(plot)
+            f.write('&program_id=')
+            f.write(program_id)
+            f.write('&series_id=')
+            f.write(series_id)
+            f.write('&channel_id=')
+            f.write(channel_id)
+            f.write('&airing_id=')
+            f.write(airing_id)
+            f.write('&tms_id=')
+            f.write(tms_id)
+            f.write('&icon=')
+            f.write(icon)
+            f.write('&title=')
+            f.write(title)
+            f.close()
+        else:
+            xbmcgui.Dialog().notification("LIBRARY EXPORT:", "PATH FAILED", xbmcgui.NOTIFICATION_ERROR, 10000)
+            sys.exit()
+    xbmcgui.Dialog().notification("LIBRARY EXPORT:", "FINISHED", xbmcgui.NOTIFICATION_INFO, 5000)
 
 
 def list_episodes(program_id):
@@ -585,7 +672,8 @@ def add_show(name, mode, icon, fanart, info, show_info):
         ('Add To Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=channel' + show_values + ')'),
         ('Remove From Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=channel' + show_values + ')'),
         ('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
-        ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')')
+        ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')'),
+        ('Add To Library', 'RunPlugin(plugin://plugin.video.psvue/?mode=850' + show_values + ')')
     ]
     liz.addContextMenuItems(context_items)
     ok = xbmcplugin.addDirectoryItem(handle=addon_handle, url=u, listitem=liz, isFolder=True)
