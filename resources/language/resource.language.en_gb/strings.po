@@ -180,3 +180,7 @@ msgstr ""
 msgctxt "#30224"
 msgid "All Channels"
 msgstr ""
+
+msgctxt "#30225"
+msgid "Export Folder"
+msgstr ""
