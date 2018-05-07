@@ -33,6 +33,7 @@
   <setting id="EPGreqPayload" type="text" default="" visible="false"/>
   <setting id="reqPayload" type="text" default="" visible="false"/>
   <setting id="last_auth" type="text" default="" visible="false"/>
+  <setting id="last_export" type="text" default="2018-01-01T12:00:00.999Z" visible="false"/>
   <setting id="deviceId" type="text" default="" visible="false"/>
   <setting id="npsso" type="text" default="" visible="false"/>
   <setting id="default_profile" type="text" default="" visible="false"/>
