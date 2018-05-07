@@ -94,6 +94,9 @@ elif mode == 800:
     sony.get_profiles()
     main_menu()
 
+elif mode == 850:
+    export_show(program_id, plot, icon)
+
 elif mode == 900:
     get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
 
