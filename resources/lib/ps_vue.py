@@ -1,10 +1,11 @@
-import sys, os
+import sys, os, re
 import xbmc, xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
 import random
 import cookielib, urllib
 import json
 import requests
 import time, calendar
+import shutil
 from datetime import date, datetime, timedelta
 from sony import SONY
 
@@ -127,6 +128,7 @@ def list_next_airings():
 def list_shows(json_source):
     for show in json_source:
         list_show(show)
+    new_date = ADDON.setSetting(id='last_export', value=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
 
 def list_show(show):
@@ -184,6 +186,14 @@ def list_show(show):
         add_show(title, 150, icon, fanart, info, show_info)
         
     add_sort_methods(addon_handle)
+    
+    path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/')
+    show_path = xbmc.translatePath(path + title + '/')
+    #When My DVR is selected, if show has been exported then it will delete the folder and re-add new episodes
+    #Only check exported shows every 8 hours
+    if xbmcvfs.exists(show_path) and EXPORT_DATE < datetime.now() - timedelta(hours=8):
+        shutil.rmtree(show_path,ignore_errors=True)
+        export_show(program_id, icon, plot)
 
 
 def export_show(program_id, plot, icon):
@@ -194,13 +204,15 @@ def export_show(program_id, plot, icon):
     
     i = 0
     for show in json_source:
-        title = str(show['display_title'])
-        #Create path to save .strm files
+        title = str(show['display_title'].encode("utf-8"))
+        plot = 'null'
+        icon = 'null'
+        #Create folder called "PSVue Library" to save .strm files
         path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/')
         xbmcvfs.mkdir(path)
         show_path = xbmc.translatePath(path + title + '/')
         xbmcvfs.mkdir(show_path)
-        
+        #Check that path was created
         if xbmcvfs.exists(path):
             if get_dict_item('season_num',show) == '':
                 season_num = 0
@@ -757,4 +769,5 @@ CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/str
 EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'
 SHOW_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/'
 PROF_ID = ADDON.getSetting(id='default_profile')
+EXPORT_DATE = string_to_date(ADDON.getSetting(id='last_export'), "%Y-%m-%dT%H:%M:%S.%fZ")
 VERIFY = False
