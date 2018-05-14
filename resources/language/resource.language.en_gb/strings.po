@@ -184,3 +184,7 @@ msgstr ""
 msgctxt "#30225"
 msgid "Export Folder"
 msgstr ""
+
+msgctxt "#30226"
+msgid "Update Library(Hours)"
+msgstr ""
