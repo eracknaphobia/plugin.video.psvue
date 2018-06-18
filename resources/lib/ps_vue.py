@@ -126,9 +126,11 @@ def list_next_airings():
 
 
 def list_shows(json_source):
+    hours = int(ADDON.getSetting(id='library_update'))
     for show in json_source:
         list_show(show)
-    new_date = ADDON.setSetting(id='last_export', value=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+    if EXPORT_DATE < datetime.now() - timedelta(hours=hours):
+        new_date = ADDON.setSetting(id='last_export', value=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
 
 def list_show(show):
@@ -187,11 +189,12 @@ def list_show(show):
         
     add_sort_methods(addon_handle)
     
+    hours = int(ADDON.getSetting(id='library_update'))
     path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/')
     show_path = xbmc.translatePath(path + title + '/')
     #When My DVR is selected, if show has been exported then it will delete the folder and re-add new episodes
     #Only check exported shows every 8 hours
-    if xbmcvfs.exists(show_path) and EXPORT_DATE < datetime.now() - timedelta(hours=8):
+    if xbmcvfs.exists(show_path) and EXPORT_DATE < datetime.now() - timedelta(hours=hours):
         shutil.rmtree(show_path,ignore_errors=True)
         export_show(program_id, icon, plot)
 
@@ -683,8 +686,8 @@ def add_show(name, mode, icon, fanart, info, show_info):
     context_items = [
         ('Add To Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=channel' + show_values + ')'),
         ('Remove From Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=channel' + show_values + ')'),
-        ('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
-        ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')'),
+        ('Add To My DVR', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
+        ('Remove From My DVR', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')'),
         ('Add To Library', 'RunPlugin(plugin://plugin.video.psvue/?mode=850' + show_values + ')')
     ]
     liz.addContextMenuItems(context_items)
@@ -713,8 +716,8 @@ def add_stream(name, link_url, icon, fanart, info=None, properties=None, show_in
         context_items = [
             ('Add To Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=channel'+show_values+')'),
             ('Remove From Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=channel'+show_values+')'),
-            ('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
-            ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')')
+            ('Add To My DVR', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
+            ('Remove From My DVR', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')')
         ]
         liz.addContextMenuItems(context_items)
     ok = xbmcplugin.addDirectoryItem(handle=addon_handle, url=u, listitem=liz, isFolder=False)

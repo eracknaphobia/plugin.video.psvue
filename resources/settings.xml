@@ -26,7 +26,7 @@
     <setting type="action" label="30004" action="RunPlugin(plugin://plugin.video.psvue/?mode=800)" option="close" />
     <setting id="always_ask_profile" type="bool" label="30213" default="false" />
     <setting id="library_folder" type="folder" label="30225" default="special://profile/addon_data/plugin.video.psvue" source="files" option="writeable" />
-
+    <setting id="library_update" type="slider" label="30226" default="4" range="4,4,48" option="int" />
   </category>
 
   <!-- Hidden -->
