@@ -126,9 +126,11 @@ def list_next_airings():
 
 
 def list_shows(json_source):
+    hours = int(ADDON.getSetting(id='library_update'))
     for show in json_source:
         list_show(show)
-    new_date = ADDON.setSetting(id='last_export', value=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+    if EXPORT_DATE < datetime.now() - timedelta(hours=hours):
+        new_date = ADDON.setSetting(id='last_export', value=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
 
 def list_show(show):
@@ -187,11 +189,12 @@ def list_show(show):
         
     add_sort_methods(addon_handle)
     
+    hours = int(ADDON.getSetting(id='library_update'))
     path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/')
     show_path = xbmc.translatePath(path + title + '/')
     #When My DVR is selected, if show has been exported then it will delete the folder and re-add new episodes
     #Only check exported shows every 8 hours
-    if xbmcvfs.exists(show_path) and EXPORT_DATE < datetime.now() - timedelta(hours=8):
+    if xbmcvfs.exists(show_path) and EXPORT_DATE < datetime.now() - timedelta(hours=hours):
         shutil.rmtree(show_path,ignore_errors=True)
         export_show(program_id, icon, plot)
 
@@ -532,7 +535,13 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
-    json_source = r.json()
+
+    try:
+        json_source = r.json()
+    except ValueError:
+        xbmcgui.Dialog().ok('OOPSIES', 'This episode of the', title, 'Has not aired yet')
+        sys.exit()
+
     stream_url = json_source['body']['video']
     headers = '|User-Agent='
     headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
@@ -547,7 +556,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     else:
         listitem = xbmcgui.ListItem()
         listitem.setMimeType("application/x-mpegURL")
-
+    
     if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
         stream_url = json_source['body']['video_alt']
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
