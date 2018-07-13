@@ -126,11 +126,13 @@ def list_next_airings():
 
 
 def list_shows(json_source):
+    global EXPORT_DATE
     hours = int(ADDON.getSetting(id='library_update'))
     for show in json_source:
         list_show(show)
     if EXPORT_DATE < datetime.now() - timedelta(hours=hours):
-        new_date = ADDON.setSetting(id='last_export', value=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+        EXPORT_DATE = datetime.now()
+        ADDON.setSetting(id='last_export', value=EXPORT_DATE.strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
 
 def list_show(show):
@@ -778,5 +780,7 @@ CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/str
 EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'
 SHOW_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/'
 PROF_ID = ADDON.getSetting(id='default_profile')
-EXPORT_DATE = string_to_date(ADDON.getSetting(id='last_export'), "%Y-%m-%dT%H:%M:%S.%fZ")
-VERIFY = False
+EXPORT_DATE = string_to_date("1970-01-01T00:00:00.000Z", "%Y-%m-%dT%H:%M:%S.%fZ")
+if ADDON.getSetting(id='last_export') != '':
+    EXPORT_DATE = string_to_date(ADDON.getSetting(id='last_export'), "%Y-%m-%dT%H:%M:%S.%fZ")
+VERIFY = True
