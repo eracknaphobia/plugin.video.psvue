@@ -80,6 +80,9 @@ msgctxt "#30107"
 msgid "Featured"
 msgstr ""
 
+msgctxt "#30108"
+msgid "Movies"
+msgstr ""
 
 msgctxt "#30200"
 msgid "Login Failed"
@@ -187,4 +190,8 @@ msgstr ""
 
 msgctxt "#30226"
 msgid "Update Library(Hours)"
+msgstr ""
+
+msgctxt "#30227"
+msgid "Movies"
 msgstr ""

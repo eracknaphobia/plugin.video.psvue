@@ -81,6 +81,9 @@ elif mode == 400:
 elif mode == 500:
     kids()
 
+elif mode == 550:
+    movies()
+
 elif mode == 600:
     recently_watched()
 

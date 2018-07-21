@@ -8,6 +8,7 @@
     <setting id="fav_visible" type="bool" label="30216" default="true" />
     <setting id="live_visible" type="bool" label="30217" default="true" />
     <setting id="sports_visible" type="bool" label="30218" default="true" />
+    <setting id="movies_visible" type="bool" label="30227" default="true" />
     <setting id="kids_visible" type="bool" label="30219" default="true" />
     <setting id="recent_visible" type="bool" label="30220" default="true" />
     <setting id="featured_visible" type="bool" label="30221" default="true" />

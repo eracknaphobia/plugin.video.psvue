@@ -18,6 +18,7 @@ def main_menu():
     if ADDON.getSetting(id='live_visible') == 'true': add_dir(LOCAL_STRING(30103), 300, ICON)
     if ADDON.getSetting(id='sports_visible') == 'true': add_dir(LOCAL_STRING(30104), 400, ICON)
     if ADDON.getSetting(id='kids_visible') == 'true': add_dir(LOCAL_STRING(30105), 500, ICON)
+    if ADDON.getSetting(id='movies_visible') == 'true': add_dir(LOCAL_STRING(30108), 550, ICON)
     if ADDON.getSetting(id='recent_visible') == 'true': add_dir(LOCAL_STRING(30106), 600, ICON)
     if ADDON.getSetting(id='featured_visible') == 'true': add_dir(LOCAL_STRING(30107), 700, ICON)
     if ADDON.getSetting(id='search_visible') == 'true': add_dir(LOCAL_STRING(30211), 750, ICON)
@@ -61,6 +62,9 @@ def kids():
     json_source = get_json(EPG_URL + '/programs?size=100&offset=0&filter=ds-kids')
     list_shows(json_source['body']['items'])
 
+def movies():
+    json_source = get_json(EPG_URL + '/explore/items/results/sentv_type/6/sub_type/0/content_length/0/rating/0/channel/0/sort/all/offset/28/size/600')
+    list_shows(json_source['body']['items'])
 
 def recently_watched():
     json_source = get_json(EPG_URL + '/browse/items/recently_watched/filter/shows/sort/watched_date/offset/0/size/35')
@@ -208,6 +212,7 @@ def export_show(program_id, plot, icon):
     i = 0
     for show in json_source:
         title = str(show['display_title'].encode("utf-8"))
+        sentv_type = str(show['sentv_type'].encode("utf-8"))
         plot = 'null'
         icon = 'null'
         #Create folder called "PSVue Library" to save .strm files
@@ -259,7 +264,10 @@ def export_show(program_id, plot, icon):
             else:
                 episode_prefix = str(episode_num)
             #Create .strm file and write information
-            file = 'S' + season_prefix + 'E' + episode_prefix + '.strm'
+            if sentv_type == 'Movies':
+                file = title + '.strm'
+            else:
+                file = 'S' + season_prefix + 'E' + episode_prefix + '.strm'
             
             file_path = os.path.join(xbmc.translatePath(show_path),file)
             f = xbmcvfs.File(file_path, 'w')
