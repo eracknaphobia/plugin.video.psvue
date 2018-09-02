@@ -130,11 +130,13 @@ def list_next_airings():
 
 
 def list_shows(json_source):
+    global EXPORT_DATE
     hours = int(ADDON.getSetting(id='library_update'))
     for show in json_source:
         list_show(show)
     if EXPORT_DATE < datetime.now() - timedelta(hours=hours):
-        new_date = ADDON.setSetting(id='last_export', value=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+        EXPORT_DATE = datetime.now()
+        ADDON.setSetting(id='last_export', value=EXPORT_DATE.strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
 
 def list_show(show):
@@ -212,11 +214,14 @@ def export_show(program_id, plot, icon):
     i = 0
     for show in json_source:
         title = str(show['display_title'].encode("utf-8"))
+        title = title.replace(':', '-')
         sentv_type = str(show['sentv_type'].encode("utf-8"))
         plot = 'null'
         icon = 'null'
         #Create folder called "PSVue Library" to save .strm files
-        path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/')
+        path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/' + 'TV Shows' + '/')
+        if sentv_type == 'Movies':
+            path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/' + 'Movies' + '/')
         xbmcvfs.mkdir(path)
         show_path = xbmc.translatePath(path + title + '/')
         xbmcvfs.mkdir(show_path)
@@ -700,8 +705,8 @@ def add_show(name, mode, icon, fanart, info, show_info):
     context_items = [
         ('Add To Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=channel' + show_values + ')'),
         ('Remove From Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=channel' + show_values + ')'),
-        ('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
-        ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')'),
+        ('Add To My DVR', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
+        ('Remove From My DVR', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')'),
         ('Add To Library', 'RunPlugin(plugin://plugin.video.psvue/?mode=850' + show_values + ')')
     ]
     liz.addContextMenuItems(context_items)
@@ -730,8 +735,8 @@ def add_stream(name, link_url, icon, fanart, info=None, properties=None, show_in
         context_items = [
             ('Add To Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=channel'+show_values+')'),
             ('Remove From Favorites Channels', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=channel'+show_values+')'),
-            ('Add To My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
-            ('Remove From My Shows', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')')
+            ('Add To My DVR', 'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show' + show_values + ')'),
+            ('Remove From My DVR', 'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show' + show_values + ')')
         ]
         liz.addContextMenuItems(context_items)
     ok = xbmcplugin.addDirectoryItem(handle=addon_handle, url=u, listitem=liz, isFolder=False)
@@ -786,5 +791,7 @@ CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/str
 EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'
 SHOW_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/'
 PROF_ID = ADDON.getSetting(id='default_profile')
-EXPORT_DATE = string_to_date(ADDON.getSetting(id='last_export'), "%Y-%m-%dT%H:%M:%S.%fZ")
-VERIFY = False
+EXPORT_DATE = string_to_date("1970-01-01T00:00:00.000Z", "%Y-%m-%dT%H:%M:%S.%fZ")
+if ADDON.getSetting(id='last_export') != '':
+    EXPORT_DATE = string_to_date(ADDON.getSetting(id='last_export'), "%Y-%m-%dT%H:%M:%S.%fZ")
+VERIFY = True
