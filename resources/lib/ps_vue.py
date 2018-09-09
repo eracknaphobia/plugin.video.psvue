@@ -196,7 +196,7 @@ def list_show(show):
     add_sort_methods(addon_handle)
     
     hours = int(ADDON.getSetting(id='library_update'))
-    path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/')
+    path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'), 'PSVue Library') + '/' + 'TV shows' + '/')
     show_path = xbmc.translatePath(path + title + '/')
     #When My DVR is selected, if show has been exported then it will delete the folder and re-add new episodes
     #Only check exported shows every 8 hours
