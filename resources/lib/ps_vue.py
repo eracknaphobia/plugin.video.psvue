@@ -835,4 +835,4 @@ PROFILE_ID = ADDON.getSetting(id='default_profile')
 EXPORT_DATE = string_to_date("1970-01-01T00:00:00.000Z", "%Y-%m-%dT%H:%M:%S.%fZ")
 if ADDON.getSetting(id='last_export') != '':
     EXPORT_DATE = string_to_date(ADDON.getSetting(id='last_export'), "%Y-%m-%dT%H:%M:%S.%fZ")
-VERIFY = False
+VERIFY = True

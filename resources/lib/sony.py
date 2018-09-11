@@ -21,7 +21,7 @@ class SONY:
     ua_sony = 'com.sony.snei.np.android.sso.share.oauth.versa.USER_AGENT'
     themis = 'https://themis.dl.playstation.net/themis/destro/redirect.html'
     username = ''
-    verify = False
+    verify = True
 
     def __init__(self):
         self.device_id = self.addon.getSetting('deviceId')
