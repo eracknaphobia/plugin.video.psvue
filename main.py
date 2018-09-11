@@ -1,57 +1,57 @@
 from resources.lib.ps_vue import *
 
-params=get_params()
-url=None
-name=None
-mode=None
-airing_id='null'
-channel_id='null'
-program_id='null'
-series_id='null'
-tms_id='null'
-title='null'
-plot='[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
-icon='null'
+params = get_params()
+url = None
+name = None
+mode = None
+airing_id = 'null'
+channel_id = 'null'
+program_id = 'null'
+series_id = 'null'
+tms_id = 'null'
+title = 'null'
+plot = '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
+icon = 'null'
 
-try: url=urllib.unquote_plus(params["url"])
-except: pass
-try: name=urllib.unquote_plus(params["name"])
-except: pass
-try: title=params["title"]
-except: pass
-try: plot=params["plot"]
-except: pass
-try: icon=params["icon"]
-except: pass
-try: mode=int(params["mode"])
-except: pass
-try: airing_id=params["airing_id"]
-except: pass
-try: channel_id=params["channel_id"]
-except: pass
-try: program_id=params["program_id"]
-except: pass
-try: series_id=params["series_id"]
-except: pass
-try: tms_id=params["tms_id"]
-except: pass
-
+if 'url' in params:
+    url = urllib.unquote_plus(params["url"])
+if 'name' in params:
+    name = urllib.unquote_plus(params["name"])
+if 'title' in params:
+    title = params["title"]
+if 'plot' in params:
+    plot = params["plot"]
+if 'icon' in params:
+    icon = params["icon"]
+if 'mode' in params:
+    mode = int(params["mode"])
+if 'airing_id' in params:
+    airing_id = params["airing_id"]
+if 'channel_id' in params:
+    channel_id = params["channel_id"]
+if 'program_id' in params:
+    program_id = params["program_id"]
+if 'series_id' in params:
+    series_id = params["series_id"]
+if 'tms_id' in params:
+    tms_id=params["tms_id"]
 
 check_device_id()
-
 
 sony = SONY()
 
 if mode < 998:
     if ADDON.getSetting(id='last_auth') != '':
         last_auth = string_to_date(ADDON.getSetting(id='last_auth'), "%Y-%m-%dT%H:%M:%S.%fZ")
-        if (datetime.utcnow() - last_auth).total_seconds() > 900: sony.check_auth()
+        if (datetime.utcnow() - last_auth).total_seconds() >= 5400:
+            sony.check_auth()
     else:
         sony.check_auth()
 
-
 if mode is None and mode < 998:
-    if ADDON.getSetting(id='default_profile') == '' or ADDON.getSetting(id='always_ask_profile') == 'true': sony.get_profiles()
+    if ADDON.getSetting(id='always_ask_profile') == 'true':
+        sony.get_profiles()
+
     main_menu()
 
 elif mode == 30:
