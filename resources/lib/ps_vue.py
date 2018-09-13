@@ -585,10 +585,8 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         sys.exit()
 
     stream_url = json_source['body']['video']
-    headers = '|User-Agent='
-    headers += 'Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)'
-    headers += '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
-    listitem = xbmcgui.ListItem()
+    headers = 'User-Agent=Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)' \
+              '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
 
     # Checks to see if VideoPlayer info is already saved. If not then info is loaded from stream link
     if xbmc.getCondVisibility('String.IsEmpty(ListItem.Title)'):
@@ -600,13 +598,13 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem.setMimeType("application/x-mpegURL")
     
     if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
-        stream_url = json_source['body']['video_alt']
+        # stream_url = json_source['body']['video_alt']
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)
-        listitem.setProperty('inputstream.adaptive.license_key', headers)
+        listitem.setProperty('inputstream.adaptive.license_key', "|" + headers)
     else:
-        stream_url += headers
+        stream_url = stream_url + "|" + headers
 
     listitem.setPath(stream_url)
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
