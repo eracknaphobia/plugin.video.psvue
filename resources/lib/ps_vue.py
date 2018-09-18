@@ -629,8 +629,9 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     if 0 < (mark_watched - int_time) <= 120:  # Mark video as watched if less than 2 minutes are left
         watched = 'true'
 
-    sony = SONY()
-    sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id, res_time, cur_time, watched)
+    if airing_id != 'null' or channel_id != 'null' or program_id != 'null' or series_id != 'null':
+        sony = SONY()
+        sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id, res_time, cur_time, watched)
 
 
 def get_json(url):

@@ -34,7 +34,7 @@ if 'program_id' in params:
 if 'series_id' in params:
     series_id = params["series_id"]
 if 'tms_id' in params:
-    tms_id=params["tms_id"]
+    tms_id = params["tms_id"]
 
 check_device_id()
 
@@ -102,6 +102,22 @@ elif mode == 850:
 
 elif mode == 900:
     get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
+
+elif mode == 997:
+    epg_service = xbmcaddon.Addon('service.psvue.epg')
+    epg_file_path = xbmc.translatePath(epg_service.getSetting(id='location'))
+
+    epg_toggle_off = '{"jsonrpc": "2.0", "method": "Addons.SetAddonEnabled", ' \
+                     '"params": {"addonid": "service.psvue.epg", "enabled": false}, "id": 1}'
+    xbmc.executeJSONRPC(epg_toggle_off)
+
+    xbmcvfs.delete(os.path.join(epg_file_path, 'epg.db'))
+    xbmcvfs.delete(os.path.join(epg_file_path, 'epg.xml'))
+    xbmcvfs.delete(os.path.join(epg_file_path, 'playlist.m3u'))
+
+    epg_toggle_on = '{"jsonrpc": "2.0", "method": "Addons.SetAddonEnabled", ' \
+                    '"params": {"addonid": "service.psvue.epg", "enabled": true}, "id": 1}'
+    xbmc.executeJSONRPC(epg_toggle_on)
 
 elif mode == 998:
     sys.exit()
