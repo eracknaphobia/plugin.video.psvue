@@ -12,6 +12,8 @@ tms_id = 'null'
 title = 'null'
 plot = '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
 icon = 'null'
+offset = '0'
+movie_size = '24'
 
 if 'url' in params:
     url = urllib.unquote_plus(params["url"])
@@ -35,6 +37,8 @@ if 'series_id' in params:
     series_id = params["series_id"]
 if 'tms_id' in params:
     tms_id = params["tms_id"]
+if 'offset' in params:
+    offset = params['offset']
 
 check_device_id()
 
@@ -81,8 +85,8 @@ elif mode == 400:
 elif mode == 500:
     kids()
 
-elif mode == 550:
-    movies()
+elif mode == 550 or mode == 551:
+    movies(offset, movie_size)
 
 elif mode == 600:
     recently_watched()
@@ -159,9 +163,9 @@ elif mode == 1002:
     sony.remove_from_favorites(fav_type, ids)
 
 
-if mode is not None and mode != 800 and mode != 750:
-    xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)
-elif mode == 800:
+if mode == 800 or mode == 551:
     xbmcplugin.endOfDirectory(addon_handle, updateListing=True)
+elif mode is not None and mode != 750:
+    xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)
 else:
     xbmcplugin.endOfDirectory(addon_handle)

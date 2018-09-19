@@ -73,10 +73,15 @@ def kids():
     list_shows(json_source['body']['items'])
 
 
-def movies():
+def movies(offset, size):
     json_source = get_json(EPG_URL + '/explore/items/results/sentv_type/6/sub_type/0/content_length/0/rating/0'
-                                     '/channel/0/sort/all/offset/28/size/600')
+                                     '/channel/0/sort/all/offset/' + offset + '/size/' + size)
+    if int(offset) > 0:
+        add_dir('[B]<< Prev[/B]', 551, ICON, None, None, str(int(offset) - int(size)))
+
     list_shows(json_source['body']['items'])
+
+    add_dir('[B]Next >>[/B]', 551, ICON, None, None, str(int(offset) + int(size)))
 
 
 def recently_watched():
@@ -701,11 +706,15 @@ def utc_to_local(utc_dt):
     return local_dt
 
 
-def add_dir(name, mode, icon, fanart=None, channel_id=None):
+def add_dir(name, mode, icon, fanart=None, channel_id=None, offset=None):
     u = sys.argv[0] + "?mode=" + str(mode)
-    if channel_id is not None: u += "&channel_id=" + channel_id
+    if channel_id is not None:
+        u += "&channel_id=" + channel_id
+    if offset is not None:
+        u += "&offset=" + offset
     liz = xbmcgui.ListItem(name)
-    if fanart is None: fanart = FANART
+    if fanart is None:
+        fanart = FANART
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
     ok = xbmcplugin.addDirectoryItem(handle=addon_handle, url=u, listitem=liz, isFolder=True)
     xbmcplugin.setContent(addon_handle, 'tvshows')
