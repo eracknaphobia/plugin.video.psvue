@@ -15,7 +15,7 @@
     <news>
         - Add EPG reset mode, which is callable from PS EPG Service
         - Only set resume time when necessary
-        - Add next & previous items to Movies
+        - Add next and previous items to Movies
         - Add Playback settings to enable/disable inputstream adaptive for ps vue
         - Add Playback setting to enable/disable using alternate stream url
         - Add Trending Live section
