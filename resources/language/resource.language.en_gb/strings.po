@@ -41,7 +41,7 @@ msgid "Reset Device ID"
 msgstr ""
 
 msgctxt "#30006"
-msgid "Logout Succesful"
+msgid "Logout Successful"
 msgstr ""
 
 msgctxt "#30007"
@@ -192,6 +192,18 @@ msgctxt "#30226"
 msgid "Update Library(Hours)"
 msgstr ""
 
-msgctxt "#30227"
-msgid "Movies"
+msgctxt "#30228"
+msgid "Trending Live"
+msgstr ""
+
+msgctxt "#30300"
+msgid "Playback"
+msgstr ""
+
+msgctxt "#30310"
+msgid "Use Inputstream Adaptive"
+msgstr ""
+
+msgctxt "#30320"
+msgid "Use Alternate Stream"
 msgstr ""

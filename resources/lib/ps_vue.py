@@ -14,6 +14,8 @@ def main_menu():
         add_dir(LOCAL_STRING(30224), 30, ICON)
     if ADDON.getSetting(id='next_airings_visible') == 'true':
         add_dir(LOCAL_STRING(30100), 50, ICON)
+    if ADDON.getSetting(id='trending_visible') == 'true':
+        add_dir(LOCAL_STRING(30228), 75, ICON)
     if ADDON.getSetting(id='myshows_visible') == 'true':
         add_dir(LOCAL_STRING(30101), 100, ICON)
     if ADDON.getSetting(id='fav_visible') == 'true':
@@ -41,6 +43,11 @@ def all_channels():
 
 def next_airings():
     list_next_airings()
+
+
+def trending():
+    json_source = get_json(EPG_URL + '/browse/items/now_playing/filter/all/sort/popular/offset/0/size/40')
+    list_shows(json_source['body']['items'])
 
 
 def my_shows():
@@ -74,8 +81,14 @@ def kids():
 
 
 def movies(offset, size):
+    # Movie Genre (sub_type)
+    # 0 = All
+    # 49 = Action
+    # 54 = Comedy
+    # 84 = SciFi
+
     json_source = get_json(EPG_URL + '/explore/items/results/sentv_type/6/sub_type/0/content_length/0/rating/0'
-                                     '/channel/0/sort/all/offset/' + offset + '/size/' + size)
+                                     '/channel/0/sort/popular/offset/' + offset + '/size/' + size)
     if int(offset) > 0:
         add_dir('[B]<< Prev[/B]', 551, ICON, None, None, str(int(offset) - int(size)))
 
@@ -590,6 +603,9 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         sys.exit()
 
     stream_url = json_source['body']['video']
+    if ADDON.getSetting(id='alt_stream') == 'true':
+        stream_url = json_source['body']['video_alt']
+
     headers = 'User-Agent=Adobe Primetime/1.4 Dalvik/2.1.0 (Linux; U; Android 6.0.1 Build/MOB31H)' \
               '&Cookie=reqPayload=' + urllib.quote('"' + ADDON.getSetting(id='EPGreqPayload') + '"')
 
@@ -602,8 +618,8 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         listitem = xbmcgui.ListItem()
         listitem.setMimeType("application/x-mpegURL")
     
-    if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
-        # stream_url = json_source['body']['video_alt']
+    if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)') \
+            and ADDON.getSetting(id='inputstream_adaptive') == 'true':
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
         listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)

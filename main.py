@@ -13,7 +13,7 @@ title = 'null'
 plot = '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
 icon = 'null'
 offset = '0'
-movie_size = '24'
+movie_size = '40'
 
 if 'url' in params:
     url = urllib.unquote_plus(params["url"])
@@ -63,6 +63,9 @@ elif mode == 30:
 
 elif mode == 50:
     next_airings()
+
+elif mode == 75:
+    trending()
 
 elif mode == 100:
     my_shows()
