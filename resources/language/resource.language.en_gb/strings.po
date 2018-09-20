@@ -205,5 +205,5 @@ msgid "Use Inputstream Adaptive"
 msgstr ""
 
 msgctxt "#30320"
-msgid "Use Alternate Stream"
+msgid "Play Alternate Stream"
 msgstr ""
