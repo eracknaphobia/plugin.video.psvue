@@ -22,6 +22,8 @@
         <setting id="deviceId" type="text" default="" visible="false"/>
         <setting id="npsso" type="text" default="" visible="false"/>
         <setting id="default_profile" type="text" default="" visible="false"/>
+        <setting id="movie_genre_id" type="text" default="0" visible="false"/>
+        <setting id="movie_genre_name" type="text" default="All" visible="false"/>
     </category>
 
     <!--Login-->

@@ -207,3 +207,88 @@ msgstr ""
 msgctxt "#30320"
 msgid "Play Alternate Stream"
 msgstr ""
+
+msgctxt "#30897"
+msgid "<< Prev."
+msgstr ""
+
+msgctxt "#30898"
+msgid "Next >>"
+msgstr ""
+
+
+msgctxt "#30899"
+msgid "Select Genre"
+msgstr ""
+
+msgctxt "#30900"
+msgid "All"
+msgstr ""
+
+msgctxt "#30905"
+msgid "Action & Adventure"
+msgstr ""
+
+msgctxt "#30910"
+msgid "Animation"
+msgstr ""
+
+msgctxt "#30915"
+msgid "Comedy"
+msgstr ""
+
+msgctxt "#30920"
+msgid "Crime"
+msgstr ""
+
+msgctxt "#30925"
+msgid "Documentary"
+msgstr ""
+
+msgctxt "#30930"
+msgid "Drama"
+msgstr ""
+
+msgctxt "#30935"
+msgid "Fantasy"
+msgstr ""
+
+msgctxt "#30940"
+msgid "History"
+msgstr ""
+
+msgctxt "#30945"
+msgid "Horror"
+msgstr ""
+
+msgctxt "#30950"
+msgid "Kids"
+msgstr ""
+
+msgctxt "#30955"
+msgid "Military & War"
+msgstr ""
+
+msgctxt "#30960"
+msgid "Musical"
+msgstr ""
+
+msgctxt "#30965"
+msgid "Other Sports"
+msgstr ""
+
+msgctxt "#30970"
+msgid "Romance"
+msgstr ""
+
+msgctxt "#30975"
+msgid "Science Fiction"
+msgstr ""
+
+msgctxt "#30980"
+msgid "Suspense"
+msgstr ""
+
+msgctxt "#30985"
+msgid "Western"
+msgstr ""

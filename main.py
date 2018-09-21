@@ -88,7 +88,10 @@ elif mode == 400:
 elif mode == 500:
     kids()
 
-elif mode == 550 or mode == 551:
+elif mode == 550 or mode == 551 or mode == 552:
+    if mode == 552:
+        get_genre()
+
     movies(offset, movie_size)
 
 elif mode == 600:
@@ -166,7 +169,7 @@ elif mode == 1002:
     sony.remove_from_favorites(fav_type, ids)
 
 
-if mode == 800 or mode == 551:
+if mode == 800 or mode == 551 or mode == 552:
     xbmcplugin.endOfDirectory(addon_handle, updateListing=True)
 elif mode is not None and mode != 750:
     xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)

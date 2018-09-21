@@ -81,20 +81,18 @@ def kids():
 
 
 def movies(offset, size):
-    # Movie Genre (sub_type)
-    # 0 = All
-    # 49 = Action
-    # 54 = Comedy
-    # 84 = SciFi
-
-    json_source = get_json(EPG_URL + '/explore/items/results/sentv_type/6/sub_type/0/content_length/0/rating/0'
+    json_source = get_json(EPG_URL + '/explore/items/results/sentv_type/6/sub_type/'
+                                     + ADDON.getSetting(id='movie_genre_id') + '/content_length/0/rating/0'
                                      '/channel/0/sort/popular/offset/' + offset + '/size/' + size)
+
+    add_dir('[B]' + LOCAL_STRING(30899) + '( ' + ADDON.getSetting(id='movie_genre_name') + ')[/B]', 552, ICON,
+            None, None, "0")
     if int(offset) > 0:
-        add_dir('[B]<< Prev[/B]', 551, ICON, None, None, str(int(offset) - int(size)))
+        add_dir('[B]' + LOCAL_STRING(30897) + '[/B]', 551, ICON, None, None, str(int(offset) - int(size)))
 
     list_shows(json_source['body']['items'])
 
-    add_dir('[B]Next >>[/B]', 551, ICON, None, None, str(int(offset) + int(size)))
+    add_dir('[B]' + LOCAL_STRING(30898) + '[/B]', 551, ICON, None, None, str(int(offset) + int(size)))
 
 
 def recently_watched():
@@ -570,6 +568,78 @@ def list_channel(channel):
         add_dir(title, 350, icon, fanart, channel_id)
     else:
         add_stream(title, channel_url, icon, fanart, info, properties, show_info)
+
+
+def get_genre():
+    """
+    -----------------------
+     Movie Genre (sub_type)
+    -----------------------
+    0   All
+    49  Action & Adventure
+    50  Animation
+    54  Comedy
+    97  Crime
+    55  Documentary
+    56  Drama
+    99  Fantasy
+    64  History
+    68  Horror
+    70  Kids
+    72  Military & War
+    74  Musical
+    78  Other Sports
+    83  Romance
+    84  Science Fiction
+    87  Suspense
+    93  Western
+    """
+    genre_dict = {LOCAL_STRING(30900): '0',
+                  LOCAL_STRING(30905): '49',
+                  LOCAL_STRING(30910): '50',
+                  LOCAL_STRING(30915): '54',
+                  LOCAL_STRING(30920): '97',
+                  LOCAL_STRING(30925): '55',
+                  LOCAL_STRING(30930): '56',
+                  LOCAL_STRING(30935): '99',
+                  LOCAL_STRING(30940): '64',
+                  LOCAL_STRING(30945): '68',
+                  LOCAL_STRING(30950): '70',
+                  LOCAL_STRING(30955): '72',
+                  LOCAL_STRING(30960): '73',
+                  LOCAL_STRING(30965): '78',
+                  LOCAL_STRING(30970): '83',
+                  LOCAL_STRING(30975): '84',
+                  LOCAL_STRING(30980): '87',
+                  LOCAL_STRING(30985): '93'
+                  }
+
+    genre_list = [LOCAL_STRING(30900),
+                  LOCAL_STRING(30905),
+                  LOCAL_STRING(30910),
+                  LOCAL_STRING(30915),
+                  LOCAL_STRING(30920),
+                  LOCAL_STRING(30925),
+                  LOCAL_STRING(30930),
+                  LOCAL_STRING(30935),
+                  LOCAL_STRING(30940),
+                  LOCAL_STRING(30945),
+                  LOCAL_STRING(30950),
+                  LOCAL_STRING(30955),
+                  LOCAL_STRING(30960),
+                  LOCAL_STRING(30965),
+                  LOCAL_STRING(30970),
+                  LOCAL_STRING(30975),
+                  LOCAL_STRING(30980),
+                  LOCAL_STRING(30985)
+                  ]
+
+    dialog = xbmcgui.Dialog()
+    ret = dialog.select(LOCAL_STRING(30899), genre_list)
+    if ret >= 0:
+        ADDON.setSetting(id='movie_genre_id', value=genre_dict[genre_list[ret]])
+        ADDON.setSetting(id='movie_genre_name', value=genre_list[ret])
+        # self.set_profile(prof_dict[prof_list[ret]])
 
 
 def get_dict_item(key, dictionary):
