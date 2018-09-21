@@ -639,7 +639,6 @@ def get_genre():
     if ret >= 0:
         ADDON.setSetting(id='movie_genre_id', value=genre_dict[genre_list[ret]])
         ADDON.setSetting(id='movie_genre_name', value=genre_list[ret])
-        # self.set_profile(prof_dict[prof_list[ret]])
 
 
 def get_dict_item(key, dictionary):
