@@ -85,14 +85,12 @@ def movies(offset, size):
                                      + ADDON.getSetting(id='movie_genre_id') + '/content_length/0/rating/0'
                                      '/channel/0/sort/popular/offset/' + offset + '/size/' + size)
 
-    add_dir('[B]' + LOCAL_STRING(30899) + '( ' + ADDON.getSetting(id='movie_genre_name') + ')[/B]', 552, ICON,
-            None, None, "0")
     if int(offset) > 0:
         add_dir('[B]' + LOCAL_STRING(30897) + '[/B]', 551, ICON, None, None, str(int(offset) - int(size)))
 
     list_shows(json_source['body']['items'])
 
-    add_dir('[B]' + LOCAL_STRING(30898) + '[/B]', 551, ICON, None, None, str(int(offset) + int(size)))
+    add_dir('[B]' + LOCAL_STRING(30898) + '[/B]', 552, ICON, None, None, str(int(offset) + int(size)))
 
 
 def recently_watched():
