@@ -89,10 +89,11 @@ elif mode == 500:
     kids()
 
 elif mode == 550 or mode == 551 or mode == 552:
-    if mode == 552:
+    if mode == 550:
         get_genre()
-
-    movies(offset, movie_size)
+        movies(offset, movie_size)
+    if mode == 551 or mode == 552:
+        movies(offset, movie_size)
 
 elif mode == 600:
     recently_watched()
