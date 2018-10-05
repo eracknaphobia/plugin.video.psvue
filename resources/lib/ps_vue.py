@@ -29,7 +29,7 @@ def main_menu():
     if ADDON.getSetting(id='movies_visible') == 'true':
         add_dir(LOCAL_STRING(30108), 550, ICON)
     if ADDON.getSetting(id='recent_visible') == 'true':
-        add_dir(LOCAL_STRING(30106), 600, ICON)
+        add_dir(LOCAL_STRING(30106), 600, ICON}
     if ADDON.getSetting(id='featured_visible') == 'true':
         add_dir(LOCAL_STRING(30107), 700, ICON)
     if ADDON.getSetting(id='search_visible') == 'true':
@@ -176,7 +176,10 @@ def list_show(show):
             if image['width'] >= 1080:
                 fanart = image['src']
             if icon != ICON and fanart != FANART: break
-    title = show['display_title']
+    if str(show['is_new']).upper() == 'TRUE':
+        title = '[COLOR=yellow]New[/COLOR] ' + show['display_title']
+    else:
+        title = show['display_title']
         
     airing_id = 'null'
     if 'airings' in show:
@@ -362,6 +365,7 @@ def list_episode(show):
     # Set variables from json
     show_title = show['display_title']
     title = show['display_episode_title']
+    channel_name = show['title']
     airing_id = str(show['airings'][0]['airing_id'])
     airing_IDS = len(show['airings'])
     air_num = 0
@@ -409,27 +413,22 @@ def list_episode(show):
 
     plot = get_dict_item('synopsis', show)
 
-    if str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE' \
-            and str(show['is_new']).upper() == 'TRUE':
-        name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + airing_date.strftime('%m/%d/%y') \
-               + '   ' + title + '    ' + '([B][COLOR=FFFFA500]NEW[/COLOR][/B])'
-        channel_name = show['title']
-        show_title = show['display_episode_title']
+    badge = ''
+    for item in show['airings']:
+        if badge != '':
+            badge += ', '
+        badge += item['badge']
 
-    elif str(show['airings'][0]['badge']) != 'live' and str(show['playable']).upper() == 'TRUE':
-        name = '[B][COLOR=FFB048B5]Aired On[/COLOR][/B]' + '  ' + airing_date.strftime('%m/%d/%y') + '   ' + title
-        channel_name = show['title']
-        show_title = show['display_episode_title']
-
-    elif str(show['playable']).upper() == 'FALSE':
-        # Add airing date/time to title for upcoming shows
-        name = '[B][I][COLOR=FFFFFF66]AIRING ON[/COLOR][/I][/B]' + '  ' + airing_date.strftime('%m/%d/%y') \
-               + '  @' + airing_date.strftime('%I:%M %p').lstrip('0') + '    ' + show_title
-    
-    # Sort Live shows and episodes no longer available to watch
-    elif str(show['airings'][0]['badge']) == 'live':
-        name = title
-        channel_name = channel_name + '    ' + '[B][I][COLOR=FFFFFF66]Live[/COLOR][/I][/B]'
+    vbadge = ''
+    if str(show['is_new']).upper() == 'TRUE':
+        vbadge = '[COLOR=yellow]New[/COLOR] '
+    if 'live' in badge:
+        vbadge = vbadge + '[COLOR=red]Live[/COLOR] '
+    if 'dvr' in badge:
+        vbadge = vbadge + '[COLOR=dodgerblue]DVR[/COLOR] '
+    elif 'vod' in badge:
+        vbadge = vbadge + '[COLOR=springgreen]VOD[/COLOR] '
+    name = vbadge + title
 
     # Add resumetime if applicable
     resumetime=''
