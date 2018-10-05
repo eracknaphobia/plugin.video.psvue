@@ -29,7 +29,7 @@ def main_menu():
     if ADDON.getSetting(id='movies_visible') == 'true':
         add_dir(LOCAL_STRING(30108), 550, ICON)
     if ADDON.getSetting(id='recent_visible') == 'true':
-        add_dir(LOCAL_STRING(30106), 600, ICON}
+        add_dir(LOCAL_STRING(30106), 600, ICON)
     if ADDON.getSetting(id='featured_visible') == 'true':
         add_dir(LOCAL_STRING(30107), 700, ICON)
     if ADDON.getSetting(id='search_visible') == 'true':
