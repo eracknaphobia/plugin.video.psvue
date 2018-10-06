@@ -422,6 +422,8 @@ def list_episode(show):
     vbadge = ''
     if str(show['is_new']).upper() == 'TRUE':
         vbadge = '[COLOR=yellow]New[/COLOR] '
+    if str(show['playable']).upper() == 'FALSE':
+        vbadge = '@' + airing_date.strftime('%I:%M %p').lstrip('0') + '    '
     if 'live' in badge:
         vbadge = vbadge + '[COLOR=red]Live[/COLOR] '
     if 'dvr' in badge:
