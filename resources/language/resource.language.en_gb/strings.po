@@ -84,6 +84,14 @@ msgctxt "#30108"
 msgid "Movies"
 msgstr ""
 
+msgctxt "#30198"
+msgid "Playback Failed"
+msgstr ""
+
+msgctxt "#30199"
+msgid "This episode has not aired yet"
+msgstr ""
+
 msgctxt "#30200"
 msgid "Login Failed"
 msgstr ""

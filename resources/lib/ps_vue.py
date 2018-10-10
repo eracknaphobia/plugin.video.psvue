@@ -665,7 +665,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     try:
         json_source = r.json()
     except ValueError:
-        xbmcgui.Dialog().ok('OOPSIES', 'This episode of the', title, 'Has not aired yet')
+        xbmcgui.Dialog().ok(LOCAL_STRING(30198), LOCAL_STRING(30199))
         sys.exit()
 
     stream_url = json_source['body']['video']
