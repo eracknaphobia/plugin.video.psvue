@@ -347,7 +347,7 @@ def list_episodes(program_id):
     
     # Sort by airing_date newest to oldest
     json_source = json_source['body']['items']
-    json_source = sorted(json_source, key=lambda k: k['airing_date'], reverse=True)
+    #json_source = sorted(json_source, key=lambda k: k['airing_date'], reverse=True)
     
     for show in json_source:
         list_episode(show)
