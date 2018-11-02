@@ -4,7 +4,6 @@ import random
 import cookielib, urllib
 import requests
 import time
-import shutil
 from datetime import datetime, timedelta
 from sony import SONY
 
@@ -234,12 +233,15 @@ def list_show(show):
     
     hours = int(ADDON.getSetting(id='library_update'))
     path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'),
-                                           'PSVue Library') + '/' + 'TV shows' + '/')
+                                           'PSVue Library') + '/' + 'TV Shows' + '/')
     show_path = xbmc.translatePath(path + title + '/')
     # When My DVR is selected, if show has been exported then it will delete the folder and re-add new episodes
     # Only check exported shows every 8 hours
     if xbmcvfs.exists(show_path) and EXPORT_DATE < datetime.now() - timedelta(hours=hours):
-        shutil.rmtree(show_path,ignore_errors=True)
+    	folders, files = xbmcvfs.listdir(xbmc.translatePath(show_path))
+        for file in files:
+		file_path = xbmc.translatePath(os.path.join(xbmc.translatePath(show_path), file))
+		xbmcvfs.delete(file_path)		
         export_show(program_id, icon, plot)
 
 
