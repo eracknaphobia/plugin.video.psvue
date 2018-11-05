@@ -366,22 +366,23 @@ def list_episode(show):
     show_title = show['display_title']
     title = show['display_episode_title']
     channel_name = show['title']
-    airing_id = str(show['airings'][0]['airing_id'])
     airing_IDS = len(show['airings'])
     air_num = 0
-    if airing_IDS > 1:
-        airing_id = str(show['airings'][1]['airing_id'])
-        air_num = 1
+    for idx, item in show['airings']:
+        if str(item['badge']).upper() == 'DVR':
+            air_num = idx
+
+    airing_id = str(show['airings'][air_num]['airing_id'])
 
     channel_name = 'null'
     if 'airings' in show:
-        channel_name = str(show['airings'][0]['channel_name'])
+        channel_name = str(show['airings'][air_num]['channel_name'])
     else:
         channel_name = str(show['channel']['name'])
 
     channel_id = 'null'
     if 'airings' in show:
-        channel_id = str(show['airings'][0]['channel_id'])
+        channel_id = str(show['airings'][air_num]['channel_id'])
     else:
         channel_id = str(show['channel']['channel_id'])
 
@@ -394,9 +395,9 @@ def list_episode(show):
     
     airing_date = show['airing_date']
     airing_date = string_to_date(airing_date, "%Y-%m-%dT%H:%M:%S.%fZ")
-    airing_enddate = str(show['airings'][0]['airing_enddate'])
+    airing_enddate = str(show['airings'][air_num]['airing_enddate'])
     airing_enddate = string_to_date(airing_enddate, "%Y-%m-%dT%H:%M:%S.%fZ")
-    age_rating = get_dict_item('age_rating',show['airings'][0])
+    age_rating = get_dict_item('age_rating',show['airings'][air_num])
     duration = airing_enddate - airing_date
     
     airing_date = utc_to_local(airing_date)
