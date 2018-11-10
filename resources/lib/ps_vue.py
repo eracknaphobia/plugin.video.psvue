@@ -241,7 +241,7 @@ def list_show(show):
     	folders, files = xbmcvfs.listdir(xbmc.translatePath(show_path))
         for file in files:
             file_path = xbmc.translatePath(os.path.join(xbmc.translatePath(show_path), file))
-            xbmcvfs.delete(file_path)		
+            xbmcvfs.delete(file_path)
         export_show(program_id, icon, plot)
 
 
