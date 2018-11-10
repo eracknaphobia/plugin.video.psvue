@@ -369,10 +369,11 @@ def list_episode(show):
     title = show['display_episode_title']
     channel_name = show['title']
     airing_id = str(show['airings'][0]['airing_id'])
+    vod_airing_id = str(show['airings'][0]['airing_id'])
     airing_IDS = len(show['airings'])
     air_num = 0
     if airing_IDS > 1:
-        airing_id = str(show['airings'][1]['airing_id'])
+        vod_airing_id = str(show['airings'][1]['airing_id'])
         air_num = 1
 
     channel_name = 'null'
@@ -445,9 +446,6 @@ def list_episode(show):
             h,m,s,ms = resumetime.split(':')
         resumetime = str(int(h) * 3600 + int(m) * 60 + int(s))
 
-    # xbmc.log("RESUME TIME IN Seconds = "+resumetime)
-    # xbmc.log("TOTAL TIME IN Seconds = "+str(int(duration.total_seconds())))
-    
     show_url = SHOW_URL + '/' + airing_id
     
     info = {
@@ -471,6 +469,7 @@ def list_episode(show):
     }
     
     show_info = {
+        'vod': vod_airing_id,
         'airing_id': airing_id,
         'channel_id': channel_id,
         'program_id': program_id,
