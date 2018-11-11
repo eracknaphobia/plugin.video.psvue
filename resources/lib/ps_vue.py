@@ -318,7 +318,7 @@ def export_show(program_id, plot, icon):
             
             file_path = os.path.join(xbmc.translatePath(show_path),file)
             f = xbmcvfs.File(file_path, 'w')
-            f.write('plugin://plugin.video.psvue/?mode=900&url=')
+            f.write('plugin://plugin.video.psvue/?mode=950&url=')
             f.write(episode_url)
             f.write('&plot=')
             f.write(plot)
