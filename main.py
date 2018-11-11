@@ -117,7 +117,7 @@ elif mode == 850:
 
 elif mode == 900:
     if vod != airing_id:
-        choice = xbmcgui.Dialog().yesno("Where would you like to watch this episode?","Click an item below to choose your preference", nolabel='ON DEMAND', yeslabel='DVR', autoclose=10000)
+        choice = xbmcgui.Dialog().yesno("Where would you like to watch this episode?","Click an item below to choose your preference", nolabel='ON DEMAND', yeslabel='DVR')
         if choice:
             get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
         else:
@@ -125,6 +125,9 @@ elif mode == 900:
             url = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/' + vod
             get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
 
+    get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
+
+elif mode == 950:
     get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
 
 elif mode == 997:
