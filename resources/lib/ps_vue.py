@@ -318,7 +318,7 @@ def export_show(program_id, plot, icon):
             
             file_path = os.path.join(xbmc.translatePath(show_path),file)
             f = xbmcvfs.File(file_path, 'w')
-            f.write('plugin://plugin.video.psvue/?mode=950&url=')
+            f.write('plugin://plugin.video.psvue/?mode=900&url=')
             f.write(episode_url)
             f.write('&plot=')
             f.write(plot)
@@ -439,7 +439,6 @@ def list_episode(show):
     resumetime=''
     if 'last_timecode' in show['airings'][air_num]:
         resumetime = str(show['airings'][air_num]['last_timecode'])
-        xbmc.log("RESUME TIME = "+resumetime)
         try:
             h,m,s = resumetime.split(':')
         except ValueError:
@@ -465,7 +464,8 @@ def list_episode(show):
     properties = {
         'totaltime': str(int(duration.total_seconds())),
         'resumetime': resumetime,
-        'IsPlayable': str(show['playable']).lower()
+        'IsPlayable': str(show['playable']).lower(),
+		'dvr_vod': airing_id
     }
     
     show_info = {
@@ -852,6 +852,8 @@ def add_stream(name, link_url, icon, fanart, info=None, properties=None, show_in
             liz.setProperty(key,value)
         if 'IsPlayable' in properties and properties['IsPlayable'] == 'false':
             u += "&mode=" + str(998)
+		elif 'dvr_vod' in properties:
+			u += "&mode=" + str(950)
         else:
             u += "&mode=" + str(900)
 
