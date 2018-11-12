@@ -1,11 +1,9 @@
 from resources.lib.ps_vue import *
-import xbmcgui
 
 params = get_params()
 url = None
 name = None
 mode = None
-vod = 'null'
 airing_id = 'null'
 channel_id = 'null'
 program_id = 'null'
@@ -25,8 +23,6 @@ if 'title' in params:
     title = params["title"]
 if 'plot' in params:
     plot = params["plot"]
-if 'vod' in params:
-    vod = params["vod"]
 if 'icon' in params:
     icon = params["icon"]
 if 'mode' in params:
@@ -116,18 +112,6 @@ elif mode == 850:
     export_show(program_id, plot, icon)
 
 elif mode == 900:
-    if vod != airing_id:
-        choice = xbmcgui.Dialog().yesno("Where would you like to watch this episode?","Click an item below to choose your preference", nolabel='ON DEMAND', yeslabel='DVR')
-        if choice:
-            get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
-        else:
-            airing_id = vod
-            url = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/' + vod
-            get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
-
-    get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
-
-elif mode == 950:
     get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
 
 elif mode == 997:
