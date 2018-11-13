@@ -527,27 +527,29 @@ def list_channel(channel):
     else:
         title = channel['title']
         channel_id = str(channel['id'])
-
-    plot = get_dict_item('synopsis', channel['sub_item'])
-    season = get_dict_item('season_num', channel['sub_item'])
-    episode = get_dict_item('episode_num', channel['sub_item'])
-    show_title = get_dict_item('display_title', channel['sub_item'])
-    plot = show_title.upper() + ':        ' + plot
+    
+    # ['sub_item'] is no longer an item in the JSON. The website still has the item though
+    '''
+    #plot = get_dict_item('synopsis', channel['sub_item'])
+    #season = get_dict_item('season_num', channel['sub_item'])
+    #episode = get_dict_item('episode_num', channel['sub_item'])
+    #show_title = get_dict_item('display_title', channel['sub_item'])
+    #plot = show_title.upper() + ':        ' + plot
 
     genre = ''
     for item in (channel['sub_item']['genres']):
         if genre != '': genre += ', '
         genre += item['genre']
-
+        '''
     channel_url = CHANNEL_URL + '/' + channel_id
     
     info = {
-        'season':season,
-        'episode':episode,
-        'plot': plot,
-        'title': title,
-        'originaltitle': show_title,
-        'genre': genre
+        #'season':season,
+        #'episode':episode,
+        #'plot': plot,
+        'title': title
+        #'originaltitle': show_title,
+        #'genre': genre
     }
         
     properties = {
@@ -852,8 +854,8 @@ def add_stream(name, link_url, icon, fanart, info=None, properties=None, show_in
             liz.setProperty(key,value)
         if 'IsPlayable' in properties and properties['IsPlayable'] == 'false':
             u += "&mode=" + str(998)
-		elif 'dvr_vod' in properties:
-			u += "&mode=" + str(950)
+	elif 'dvr_vod' in properties:
+            u += "&mode=" + str(950)
         else:
             u += "&mode=" + str(900)
 
