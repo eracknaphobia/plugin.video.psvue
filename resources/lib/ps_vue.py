@@ -4,6 +4,7 @@ import random
 import cookielib, urllib
 import requests
 import time
+import shutil
 from datetime import datetime, timedelta
 from sony import SONY
 
@@ -425,8 +426,6 @@ def list_episode(show):
     vbadge = ''
     if str(show['is_new']).upper() == 'TRUE':
         vbadge = '[COLOR=yellow]New[/COLOR] '
-    if str(show['playable']).upper() == 'FALSE':
-        vbadge = '@' + airing_date.strftime('%I:%M %p').lstrip('0') + '    '
     if 'live' in badge:
         vbadge = vbadge + '[COLOR=red]Live[/COLOR] '
     if 'dvr' in badge:
@@ -670,7 +669,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     try:
         json_source = r.json()
     except ValueError:
-        xbmcgui.Dialog().ok('OOPSIES', 'This episode of the', title, 'Has not aired yet')
+        xbmcgui.Dialog().ok(LOCAL_STRING(30198), LOCAL_STRING(30199))
         sys.exit()
 
     stream_url = json_source['body']['video']
