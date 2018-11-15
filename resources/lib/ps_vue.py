@@ -120,7 +120,7 @@ def list_next_airings():
         xbmc.log(str(channel['id']) + ' ' + uni_channel)
         channel_dict[uni_channel] = str(channel['id'])
         channel_list.append(uni_channel)
-    
+	
     dialog = xbmcgui.Dialog()
     ret = dialog.select(LOCAL_STRING(30214), channel_list)
     if ret < 0:
@@ -179,7 +179,7 @@ def list_show(show):
         title = '[COLOR=yellow]New[/COLOR] ' + show['display_title']
     else:
         title = show['display_title']
-        
+
     airing_id = 'null'
     if 'airings' in show:
         airing_id = str(show['airings'][0]['airing_id'])
@@ -209,7 +209,7 @@ def list_show(show):
         'originaltitle': title,
         'genre': genre
    }
-        
+
     show_info = {
         'airing_id': airing_id,
         'channel_id': channel_id,
@@ -228,9 +228,9 @@ def list_show(show):
         add_stream(name, channel_url, icon, fanart, info, properties, show_info)
     else:
         add_show(title, 150, icon, fanart, info, show_info)
-        
+
     add_sort_methods(addon_handle)
-    
+
     hours = int(ADDON.getSetting(id='library_update'))
     path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'),
                                            'PSVue Library') + '/' + 'TV Shows' + '/')
@@ -250,7 +250,7 @@ def export_show(program_id, plot, icon):
     url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/500'
     json_source = get_json(url)
     json_source = json_source['body']['items']
-    
+
     i = 0
     for show in json_source:
         title = str(show['display_title'].encode("utf-8"))
@@ -273,7 +273,7 @@ def export_show(program_id, plot, icon):
                 season_num = 0
             else:
                 season_num = int(get_dict_item('season_num',show))
-            
+
             if get_dict_item('episode_num',show) == '':
                 episode_num = i
                 i += 1
@@ -315,7 +315,7 @@ def export_show(program_id, plot, icon):
                 file = title + '.strm'
             else:
                 file = 'S' + season_prefix + 'E' + episode_prefix + '.strm'
-            
+
             file_path = os.path.join(xbmc.translatePath(show_path),file)
             f = xbmcvfs.File(file_path, 'w')
             f.write('plugin://plugin.video.psvue/?mode=900&url=')
@@ -346,11 +346,11 @@ def export_show(program_id, plot, icon):
 def list_episodes(program_id):
     url = EPG_URL + '/details/items/program/' + program_id + '/episodes/offset/0/size/500'
     json_source = get_json(url)
-    
+
     # Sort by airing_date newest to oldest
     json_source = json_source['body']['items']
     #json_source = sorted(json_source, key=lambda k: k['airing_date'], reverse=True)
-    
+
     for show in json_source:
         list_episode(show)
 
@@ -389,19 +389,19 @@ def list_episode(show):
         channel_id = str(show['channel']['channel_id'])
 
     program_id = str(show['id'])
-    
+
     series_id = 'null'
     if 'series_id' in show: series_id = str(show['series_id'])
-    
+
     tms_id = str(show['tms_id'])
-    
+
     airing_date = show['airing_date']
     airing_date = string_to_date(airing_date, "%Y-%m-%dT%H:%M:%S.%fZ")
     airing_enddate = str(show['airings'][0]['airing_enddate'])
     airing_enddate = string_to_date(airing_enddate, "%Y-%m-%dT%H:%M:%S.%fZ")
     age_rating = get_dict_item('age_rating',show['airings'][0])
     duration = airing_enddate - airing_date
-    
+
     airing_date = utc_to_local(airing_date)
 
     media_type = 'tvshow'
@@ -446,7 +446,7 @@ def list_episode(show):
         resumetime = str(int(h) * 3600 + int(m) * 60 + int(s))
 
     show_url = SHOW_URL + '/' + airing_id
-    
+
     info = {
         'plot': plot,
         'tvshowtitle': show_title,
@@ -467,7 +467,7 @@ def list_episode(show):
         'IsPlayable': str(show['playable']).lower(),
 		'dvr_vod': airing_id
     }
-    
+
     show_info = {
         'vod': vod_airing_id,
         'airing_id': airing_id,
@@ -478,7 +478,7 @@ def list_episode(show):
         'title': title,
         'plot': plot
     }
-    
+
     add_stream(name, show_url, icon, fanart, info, properties, show_info)
 
 
@@ -527,35 +527,35 @@ def list_channel(channel):
     else:
         title = channel['title']
         channel_id = str(channel['id'])
-    
+
     # ['sub_item'] is no longer an item in the JSON. The website still has the item though
-    '''
-    #plot = get_dict_item('synopsis', channel['sub_item'])
-    #season = get_dict_item('season_num', channel['sub_item'])
-    #episode = get_dict_item('episode_num', channel['sub_item'])
-    #show_title = get_dict_item('display_title', channel['sub_item'])
-    #plot = show_title.upper() + ':        ' + plot
+
+    plot = get_dict_item('synopsis', channel['sub_item'])
+    season = get_dict_item('season_num', channel['sub_item'])
+    episode = get_dict_item('episode_num', channel['sub_item'])
+    show_title = get_dict_item('display_title', channel['sub_item'])
+    plot = show_title.upper() + ':        ' + plot
 
     genre = ''
     for item in (channel['sub_item']['genres']):
         if genre != '': genre += ', '
         genre += item['genre']
-        '''
+
     channel_url = CHANNEL_URL + '/' + channel_id
-    
+
     info = {
-        #'season':season,
-        #'episode':episode,
-        #'plot': plot,
-        'title': title
-        #'originaltitle': show_title,
-        #'genre': genre
+        'season':season,
+        'episode':episode,
+        'plot': plot,
+        'title': title,
+        'originaltitle': show_title,
+        'genre': genre
     }
-        
+
     properties = {
         'IsPlayable': 'true'
     }
-        
+
     show_info = {
         'airing_id': airing_id,
         'channel_id': channel_id,
@@ -649,7 +649,7 @@ def get_dict_item(key, dictionary):
     else:
         return ''
 
-    
+
 def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon):
     headers = {
         'Accept': '*/*',
@@ -688,7 +688,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     else:
         listitem = xbmcgui.ListItem()
         listitem.setMimeType("application/x-mpegURL")
-    
+
     if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)') \
             and ADDON.getSetting(id='inputstream_adaptive') == 'true':
         listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
@@ -760,7 +760,7 @@ def load_cookies():
         cj.load(cookie_file, ignore_discard=True)
     except:
         pass
-    
+
     return cj
 
 
@@ -769,7 +769,7 @@ def string_to_date(string, date_format):
         date = datetime.strptime(str(string), date_format)
     except TypeError:
         date = datetime(*(time.strptime(str(string), date_format)[0:6]))
-    
+
     return date
 
 
@@ -782,7 +782,7 @@ def create_device_id():
     manf_model = manf_model.encode("hex").upper()
     zero = '0'
     device_id = "0000%s%s01a8%s%s" % ("0007", "0002", android_id, manf_model + zero.ljust(32, '0'))
-    
+
     ADDON.setSetting(id='deviceId', value=device_id)
 
 
@@ -816,7 +816,7 @@ def add_sort_methods(handle):
 def add_show(name, mode, icon, fanart, info, show_info):
     u = sys.argv[0] + "?mode=" + str(mode)
     u += '&program_id=' + show_info['program_id']
-    
+
     liz = xbmcgui.ListItem(name)
     if fanart is None:
         fanart = FANART
@@ -909,7 +909,7 @@ def check_device_id():
         sony = SONY()
         sony.logout()
         device_id = ''
-    
+
     if device_id == '':
         create_device_id()
 
