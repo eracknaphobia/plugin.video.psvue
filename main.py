@@ -1,9 +1,11 @@
 from resources.lib.ps_vue import *
+import xbmcgui
 
 params = get_params()
 url = None
 name = None
 mode = None
+vod = 'null'
 airing_id = 'null'
 channel_id = 'null'
 program_id = 'null'
@@ -23,6 +25,8 @@ if 'title' in params:
     title = params["title"]
 if 'plot' in params:
     plot = params["plot"]
+if 'vod' in params:
+    vod = params["vod"]
 if 'icon' in params:
     icon = params["icon"]
 if 'mode' in params:
