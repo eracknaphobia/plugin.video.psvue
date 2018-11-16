@@ -4,6 +4,7 @@ import random
 import cookielib, urllib
 import requests
 import time
+import shutil
 from datetime import datetime, timedelta
 from sony import SONY
 
@@ -233,15 +234,12 @@ def list_show(show):
 
     hours = int(ADDON.getSetting(id='library_update'))
     path = xbmc.translatePath(os.path.join(ADDON.getSetting(id='library_folder'),
-                                           'PSVue Library') + '/' + 'TV Shows' + '/')
-    show_path = xbmc.translatePath(path + show['display_title'] + '/')
+                                           'PSVue Library') + '/' + 'TV shows' + '/')
+    show_path = xbmc.translatePath(path + title + '/')
     # When My DVR is selected, if show has been exported then it will delete the folder and re-add new episodes
     # Only check exported shows every 8 hours
     if xbmcvfs.exists(show_path) and EXPORT_DATE < datetime.now() - timedelta(hours=hours):
-    	folders, files = xbmcvfs.listdir(xbmc.translatePath(show_path))
-        for file in files:
-            file_path = xbmc.translatePath(os.path.join(xbmc.translatePath(show_path), file))
-            xbmcvfs.delete(file_path)
+        shutil.rmtree(show_path,ignore_errors=True)
         export_show(program_id, icon, plot)
 
 
@@ -369,11 +367,10 @@ def list_episode(show):
     title = show['display_episode_title']
     channel_name = show['title']
     airing_id = str(show['airings'][0]['airing_id'])
-    vod_airing_id = str(show['airings'][0]['airing_id'])
     airing_IDS = len(show['airings'])
     air_num = 0
     if airing_IDS > 1:
-        vod_airing_id = str(show['airings'][1]['airing_id'])
+        airing_id = str(show['airings'][1]['airing_id'])
         air_num = 1
 
     channel_name = 'null'
@@ -425,8 +422,6 @@ def list_episode(show):
     vbadge = ''
     if str(show['is_new']).upper() == 'TRUE':
         vbadge = '[COLOR=yellow]New[/COLOR] '
-    if str(show['playable']).upper() == 'FALSE':
-        vbadge = '@' + airing_date.strftime('%I:%M %p').lstrip('0') + '    '
     if 'live' in badge:
         vbadge = vbadge + '[COLOR=red]Live[/COLOR] '
     if 'dvr' in badge:
@@ -445,6 +440,9 @@ def list_episode(show):
             h,m,s,ms = resumetime.split(':')
         resumetime = str(int(h) * 3600 + int(m) * 60 + int(s))
 
+    # xbmc.log("RESUME TIME IN Seconds = "+resumetime)
+    # xbmc.log("TOTAL TIME IN Seconds = "+str(int(duration.total_seconds())))
+    
     show_url = SHOW_URL + '/' + airing_id
 
     info = {
@@ -469,7 +467,6 @@ def list_episode(show):
     }
 
     show_info = {
-        'vod': vod_airing_id,
         'airing_id': airing_id,
         'channel_id': channel_id,
         'program_id': program_id,
@@ -670,7 +667,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
     try:
         json_source = r.json()
     except ValueError:
-        xbmcgui.Dialog().ok('OOPSIES', 'This episode of the', title, 'Has not aired yet')
+        xbmcgui.Dialog().ok(LOCAL_STRING(30198), LOCAL_STRING(30199))
         sys.exit()
 
     stream_url = json_source['body']['video']
