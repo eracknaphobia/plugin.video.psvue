@@ -748,7 +748,7 @@ def get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title,
         sony.put_resume_time(airing_id, channel_id, program_id, series_id, tms_id, res_time, cur_time, watched)
 
 
-def get_json(url, life=timedelta(minutes=5)):
+def get_json(url, life=timedelta(minutes=1)):
     headers = {
         'Accept': '*/*',
         'reqPayload': ADDON.getSetting(id='EPGreqPayload'),
@@ -849,7 +849,7 @@ def add_show(name, mode, icon, fanart, info, show_info):
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
     liz.setInfo(type="Video", infoLabels=info)
     show_values = ''
-    for key, value in show_info.iteritems():
+    for key, value in show_info.items():
         show_values += '&%s=%s' % (key, value)
 
     context_items = [
@@ -860,7 +860,7 @@ def add_show(name, mode, icon, fanart, info, show_info):
         ('Add To My DVR',
          'RunPlugin(plugin://plugin.video.psvue/?mode=1001&fav_type=show%s)' % show_values),
         ('Remove From My DVR',
-         'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show%s' % show_values),
+         'RunPlugin(plugin://plugin.video.psvue/?mode=1002&fav_type=show%s)' % show_values),
         ('Add To Library',
          'RunPlugin(plugin://plugin.video.psvue/?mode=850%s)' % show_values)
     ]
@@ -879,7 +879,7 @@ def add_stream(name, link_url, info_art=None, info=None, properties=None, show_i
     if info is not None:
         liz.setInfo(type="Video", infoLabels=info)
     if properties is not None:
-        for key, value in properties.iteritems():
+        for key, value in properties.items():
             liz.setProperty(key,value)
         if 'IsPlayable' in properties and properties['IsPlayable'] == 'false':
             u += "&mode=" + str(998)
@@ -890,7 +890,7 @@ def add_stream(name, link_url, info_art=None, info=None, properties=None, show_i
 
     if show_info is not None:
         show_values = ''
-        for key, value in show_info.iteritems():
+        for key, value in show_info.items():
             show_values += '&%s=%s' % (key, value)
         u += show_values
         context_items = [
@@ -966,4 +966,3 @@ ICON = os.path.join(ROOTDIR, "resources", "icon.png")
 
 if ADDON.getSetting(id='last_export') != '':
     EXPORT_DATE = string_to_date(ADDON.getSetting(id='last_export'), "%Y-%m-%dT%H:%M:%S.%fZ")
-
