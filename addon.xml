@@ -3,7 +3,7 @@
     <requires>
         <import addon="xbmc.python" version="2.25.0"/>
         <import addon="script.module.requests" version="2.9.1"/>
-        <import addon="script.module.simplecache" version="1.0.14" />
+        <import addon="script.module.simplecache" version="1.0.11" />
     </requires>
     <extension point="xbmc.python.pluginsource" library="main.py">
         <provides>video</provides>
@@ -14,7 +14,7 @@
         <description lang="en_GB">PlayStation™Vue is a TV service that streams live TV, movies, and sports on a variety of your favorite devices without a cable or satellite subscription.  With powerful features that allow you to save thousands of hours of your favorite shows without recording conflicts, and Premium channels that can be purchased individually or with a multi-channel plan, TV has never been the same. No annual contracts, no conflicts, no problems.</description>
         <disclaimer lang="en_GB">Requires a valid subscription to PS Vue which is currently only available in the US</disclaimer>
         <news>
-            - Add DVR or VOD selection (thanks Snoopyjoe & hackthis02)
+            - Add DVR or VOD selection (thanks Snoopyjoe and hackthis02)
             - Library bug fix
         </news>
         <language>en</language>

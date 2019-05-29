@@ -7,7 +7,7 @@ class SONY:
     api_url = 'https://auth.api.sonyentertainmentnetwork.com/2.0'
     user_action_url = 'https://sentv-user-action.totsuko.tv/sentv_user_action/ws/v2'
     device_id = ''
-    device_type = 'android_tv'
+    device_type = 'web3-w'
     localized = addon.getLocalizedString
     login_client_id = '71a7beb8-f21a-47d9-a604-2e71bee24fe0'
     andriod_tv_client_id = '0a5fe341-cb16-47d9-991e-0110fff49713'
