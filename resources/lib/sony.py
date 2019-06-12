@@ -71,7 +71,7 @@ class SONY:
                 sys.exit()
 
         if self.username != '' and self.password != '':
-            s = requests.Session()
+            #s = requests.Session()
             if not self.valid_cookie("_abck"):
                 url = 'https://id.sonyentertainmentnetwork.com/public/8697028d4235bb0e7a5d1a9c92d95'
                 headers = {
@@ -82,7 +82,7 @@ class SONY:
                     "Referer": 'https://id.sonyentertainmentnetwork.com/'
                 }
 
-                s.get(url, headers=headers, verify=self.verify)
+                s = requests.get(url, headers=headers, verify=self.verify)
                 payload = self.get_sensor_data(s.cookies['_abck'])
                 bmsz = str(s.cookies["bm_sz"])
                 abck = str(s.cookies["_abck"])
@@ -100,9 +100,9 @@ class SONY:
                     ("Accept-Language", "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7"),
                     ("Cookie", "bm_sz=%s; _abck=%s" % (bmsz, abck))
                 ])
-                s.headers = headers
+                #s.headers = headers
 
-                s.post(url, data=payload, verify=self.verify)
+                s = requests.post(url, headers=headers, data=payload, verify=self.verify)
 
                 if '~0~' not in s.cookies['_abck']:
                     msg = "Invalid _abck cookie"
@@ -110,6 +110,7 @@ class SONY:
                     sys.exit()
 
                 self.save_cookies(s.cookies)
+                xbmc.Monitor().waitForAbort(1)
 
             url = self.api_url + '/ssocookie'
             headers = {
@@ -132,7 +133,7 @@ class SONY:
                 "client_id": self.login_client_id
             }
 
-            r = s.post(url, headers=headers, cookies=self.load_cookies(), json=json_payload, verify=self.verify)
+            r = requests.post(url, headers=headers, cookies=self.load_cookies(), json=json_payload, verify=self.verify)
             self.save_cookies(r.cookies)
             json_source = r.json()
 
@@ -579,7 +580,7 @@ class SONY:
         time_calc2 = int(timestamp % 1e7)
         time_calc3 = int(time_calc / 23)
         time_calc4 = int(time_calc3 / 6)
-        monitor.waitForAbort(1)
+        xbmc.Monitor().waitForAbort(1)
         time_calc5 = int(time.time() * 1000) - timestamp
 
         #xbmc.log("Dated Signature: %s" % signature)
