@@ -110,7 +110,6 @@ class SONY:
                     sys.exit()
 
                 self.save_cookies(s.cookies)
-                xbmc.Monitor().waitForAbort(1)
 
             url = self.api_url + '/ssocookie'
             headers = {
