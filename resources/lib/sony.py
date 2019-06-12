@@ -23,7 +23,7 @@ class SONY:
     ua_sony = 'com.sony.snei.np.android.sso.share.oauth.versa.USER_AGENT'
     themis = 'https://themis.dl.playstation.net/themis/destro/redirect.html'
     username = ''
-    verify = True
+    verify = False
 
     def __init__(self):
         self.device_id = self.addon.getSetting('deviceId')
@@ -72,42 +72,46 @@ class SONY:
 
         if self.username != '' and self.password != '':
             s = requests.Session()
-            url = 'https://id.sonyentertainmentnetwork.com/public/8697028d4235bb0e7a5d1a9c92d95'
-            headers = {
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept-Language": "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7",
-                "User-Agent": self.ua_browser,
-                "Referer": 'https://id.sonyentertainmentnetwork.com/'
-            }
+            if not self.valid_cookie("_abck"):
+                url = 'https://id.sonyentertainmentnetwork.com/public/8697028d4235bb0e7a5d1a9c92d95'
+                headers = {
+                    "Accept": "*/*",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept-Language": "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7",
+                    "User-Agent": self.ua_browser,
+                    "Referer": 'https://id.sonyentertainmentnetwork.com/'
+                }
 
-            s.get(url, headers=headers, verify=self.verify)
-            payload = self.get_sensor_data(s.cookies['_abck'])
-            bmsz = str(s.cookies["bm_sz"])
-            abck = str(s.cookies["_abck"])
+                s.get(url, headers=headers, verify=self.verify)
+                payload = self.get_sensor_data(s.cookies['_abck'])
+                bmsz = str(s.cookies["bm_sz"])
+                abck = str(s.cookies["_abck"])
 
-            headers = OrderedDict([
-                ("Host", "id.sonyentertainmentnetwork.com"),
-                ("Connection", "keep-alive"),
-                ("Content-Length", "1250"),
-                ("Origin", "https://id.sonyentertainmentnetwork.com"),
-                ("User-Agent", self.ua_browser),
-                ("Content-Type", "text/plain;charset=UTF-8"),
-                ("Accept", "*/*"),
-                ("Referer", "https://id.sonyentertainmentnetwork.com"),
-                ("Accept-Encoding", "gzip, deflate, br"),
-                ("Accept-Language", "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7"),
-                ("Cookie", "bm_sz=%s; _abck=%s" % (bmsz, abck))
-            ])
-            s.headers = headers
+                headers = OrderedDict([
+                    ("Host", "id.sonyentertainmentnetwork.com"),
+                    ("Connection", "keep-alive"),
+                    ("Content-Length", "1250"),
+                    ("Origin", "https://id.sonyentertainmentnetwork.com"),
+                    ("User-Agent", self.ua_browser),
+                    ("Content-Type", "text/plain;charset=UTF-8"),
+                    ("Accept", "*/*"),
+                    ("Referer", "https://id.sonyentertainmentnetwork.com"),
+                    ("Accept-Encoding", "gzip, deflate, br"),
+                    ("Accept-Language", "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7"),
+                    ("Cookie", "bm_sz=%s; _abck=%s" % (bmsz, abck))
+                ])
+                s.headers = headers
 
-            s.post(url, data=payload, verify=self.verify)
+                s.post(url, data=payload, verify=self.verify)
 
-            if '~0~' not in s.cookies['_abck']:
-                sys.exit()
+                if '~0~' not in s.cookies['_abck']:
+                    msg = "Invalid _abck cookie"
+                    self.notification_msg(self.localized(30200), msg)
+                    sys.exit()
+
+                self.save_cookies(s.cookies)
 
             url = self.api_url + '/ssocookie'
-
             headers = {
                 "Host": "auth.api.sonyentertainmentnetwork.com",
                 "X-Referer-Info": "https://id.sonyentertainmentnetwork.com/signin/",
@@ -121,11 +125,12 @@ class SONY:
             }
 
 
-            json_payload = {"authentication_type": "password",
-                            "username": self.username,
-                            "password": self.password,
-                            "client_id": self.login_client_id
-                            }
+            json_payload = {
+                "authentication_type": "password",
+                "username": self.username,
+                "password": self.password,
+                "client_id": self.login_client_id
+            }
 
             r = s.post(url, headers=headers, cookies=self.load_cookies(), json=json_payload, verify=self.verify)
             self.save_cookies(r.cookies)
@@ -447,6 +452,29 @@ class SONY:
             pass
 
         return cj
+
+    def valid_cookie(self, cookie_name):
+        valid_cookie = False
+        addon_profile_path = xbmc.translatePath(self.addon.getAddonInfo('profile'))
+        try:
+            cj = cookielib.LWPCookieJar()
+            cj.load(os.path.join(addon_profile_path, 'cookies.lwp'), ignore_discard=True)
+            for cookie in cj:
+                if cookie.name == cookie_name:
+                    xbmc.log('Cookie Expired? ' + str(cookie.is_expired()))
+                    if not cookie.is_expired():
+                        valid_cookie = True
+                    if cookie_name == '_abck' and '~0~' not in str(cookie.value):
+                        xbmc.log('Cookie Value: ' + str(cookie.value))
+                        valid_cookie = False
+                    break
+
+
+        except:
+            pass
+
+        xbmc.log('Is cookie valid? '+ str(valid_cookie))
+        return valid_cookie
 
     def notification_msg(self, title, msg):
         dialog = xbmcgui.Dialog()

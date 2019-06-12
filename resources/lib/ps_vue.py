@@ -959,7 +959,7 @@ UA_ANDROID = 'Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/5
              'Version/4.0 Chrome/44.0.2403.119 Safari/537.36'
 UA_ANDROID_TV = 'Mozilla/5.0 (Linux; Android 6.0.1; Hub Build/MHC19J; wv) AppleWebKit/537.36 (KHTML, like Gecko) ' \
                 'Version/4.0 Chrome/61.0.3163.98 Safari/537.36'
-VERIFY = True
+VERIFY = False
 
 FANART = os.path.join(ROOTDIR, "resources", "fanart.jpg")
 ICON = os.path.join(ROOTDIR, "resources", "icon.png")
