@@ -579,6 +579,7 @@ class SONY:
         time_calc2 = int(timestamp % 1e7)
         time_calc3 = int(time_calc / 23)
         time_calc4 = int(time_calc3 / 6)
+        monitor.waitForAbort(1)
         time_calc5 = int(time.time() * 1000) - timestamp
 
         #xbmc.log("Dated Signature: %s" % signature)
