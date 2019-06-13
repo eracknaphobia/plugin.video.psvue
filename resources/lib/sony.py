@@ -71,38 +71,21 @@ class SONY:
                 sys.exit()
 
         if self.username != '' and self.password != '':
-            #s = requests.Session()
+            s = requests.Session()
             if not self.valid_cookie("_abck"):
                 url = 'https://id.sonyentertainmentnetwork.com/public/8697028d4235bb0e7a5d1a9c92d95'
                 headers = {
                     "Accept": "*/*",
                     "Accept-Encoding": "gzip, deflate, br",
                     "Accept-Language": "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7",
+                    'Connection': 'Keep-Alive',
                     "User-Agent": self.ua_browser,
                     "Referer": 'https://id.sonyentertainmentnetwork.com/'
                 }
 
-                s = requests.get(url, headers=headers, verify=self.verify)
+                s.get(url, headers=headers, verify=self.verify)
                 payload = self.get_sensor_data(s.cookies['_abck'])
-                bmsz = str(s.cookies["bm_sz"])
-                abck = str(s.cookies["_abck"])
-
-                headers = OrderedDict([
-                    ("Host", "id.sonyentertainmentnetwork.com"),
-                    ("Connection", "keep-alive"),
-                    ("Content-Length", "1250"),
-                    ("Origin", "https://id.sonyentertainmentnetwork.com"),
-                    ("User-Agent", self.ua_browser),
-                    ("Content-Type", "text/plain;charset=UTF-8"),
-                    ("Accept", "*/*"),
-                    ("Referer", "https://id.sonyentertainmentnetwork.com"),
-                    ("Accept-Encoding", "gzip, deflate, br"),
-                    ("Accept-Language", "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7"),
-                    ("Cookie", "bm_sz=%s; _abck=%s" % (bmsz, abck))
-                ])
-                #s.headers = headers
-
-                s = requests.post(url, headers=headers, data=payload, verify=self.verify)
+                s.post(url, data=payload, verify=self.verify)
 
                 if '~0~' not in s.cookies['_abck']:
                     msg = "Invalid _abck cookie"
@@ -539,7 +522,7 @@ class SONY:
         WINDOW_HEIGHT = "937"
         WINDOW_OWIDTH = "1920"
         IS_IE = "0"
-        DOC_MODE = "0"
+        DOC_MODE = "1"
         CHROME_WEB_STORE = "0"
         ON_LINE = "1"
         OPERA = "0"
@@ -579,7 +562,7 @@ class SONY:
         time_calc2 = int(timestamp % 1e7)
         time_calc3 = int(time_calc / 23)
         time_calc4 = int(time_calc3 / 6)
-        xbmc.Monitor().waitForAbort(1)
+        xbmc.Monitor().waitForAbort(.25)
         time_calc5 = int(time.time() * 1000) - timestamp
 
         #xbmc.log("Dated Signature: %s" % signature)
