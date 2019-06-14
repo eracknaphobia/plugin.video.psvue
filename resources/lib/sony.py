@@ -33,7 +33,7 @@ class SONY:
                   '3zcpGdi/JphttWSvx6Qap2jZ3gk/eQ/8/1ITg4fbF1+FhHqN1hRzLQmy8kzSsz9YrSrrRknCIShMFH6inTCfA=~-1~-1~-1',
         'Domain': '.sonyentertainmentnetwork.com',
         'Path': '/',
-        'Expiration': 1592061014
+        'Expiration': 1592061014  # Sat, 13 Jun 2020 15:10:14 GMT
     }
     default_bmsz = {
         'Cookie': '850631B1AD8D9C9CF48F0ADEFCD188DA~YAAQRypdzIXu9jFrAQAAO2iJVgRBHqvRhyEHEH5IuKfGm4EDx0VOWSAGMS62Q2' +
@@ -41,7 +41,7 @@ class SONY:
                   '2bfQH6eijfBU2s+9unYyT42MO+/T1milmvNJl93mZLted3SsNZnmIYBKwxE',
         'Domain': '.sonyentertainmentnetwork.com',
         'Path': '/',
-        'Expiration': 1560539374
+        'Expiration': 1560539374  # Fri, 14 Jun 2019 19:09:34 GMT
     }
     username = ''
     verify = False
