@@ -1,8 +1,6 @@
 import sys, os, xbmc, xbmcaddon, xbmcgui
 import cookielib, requests, urllib
 import math, random, time
-from collections import OrderedDict
-
 
 class SONY:
     addon = xbmcaddon.Addon()
@@ -22,6 +20,19 @@ class SONY:
                     'Version/4.0 Chrome/72.0.3626.105 Safari/537.36'
     ua_sony = 'com.sony.snei.np.android.sso.share.oauth.versa.USER_AGENT'
     themis = 'https://themis.dl.playstation.net/themis/destro/redirect.html'
+    default_abck = {
+        'Cookie': '5DC97775B7F3DC59F76E655F3C5DD64D~0~YAAQrHL+pVKFujNrAQAANDE6VgLP0Ou9AoSAjkZNOVuhEaKW10pwklnbj7yz' +
+                  'L6y+C+UWSs58MofgbAOCcVgAWVsL3VphNv+KtfDNPgqAioftmseJxa3Hk4TLmxVDoLlP/hGI4jqDT7QtlmWO/ntv3CibQ3M' +
+                  '+tDVLoS/dmq9Ckf1BFwbfbbD0xxkI20WIyYvEp/vkRTiBhXykGMT4MV+ovmzEWKFtY0KKGaILe0XCL1OenhTpkDqC0zrFru' +
+                  'nvgZh7uKaTRB6VHnjJX6qoUbpCEAoLIbJYJ9byLToBDhQFiUMk2zEcaLpRziqPyhHZx7Xu/0vMCfyerTtD9LE=~-1~-1~-1',
+        'Expiration': 1592055705
+    }
+    default_bmsz = {
+        'Cookie': '35A96885A296DD2901EC317A571635B2~YAAQrHL+pU+FujNrAQAAnjA6VgSaqqrdQlkl41g33mj4ZltoxsrbMkQ9kfH3h8' +
+                  '2lk8kVSpuMevDfyAOVmJFUNMUlPm8S8IaiKubpmykQ+ht3dMakH080QbI/yv8nRm2YXLmDUJkzpVAdqNCEyM2Xiiz/CVSk6' +
+                  'aZ/ImMBjBS1A4vhA18hBWhdbk/EF42Z8iGPZqrUFGzy0d5+aAXX7WpiBaxC',
+        'Expiration': 1560534105
+    }
     username = ''
     verify = False
 
@@ -45,6 +56,9 @@ class SONY:
                 for cookie in cj:
                     if cookie.name == 'npsso':
                         expired_cookies = cookie.is_expired()
+                        break
+                    if cookie.name == '_abck' and cookie.value == self.default_abck['Cookie']:
+                        expired_cookies = True
                         break
         except:
             pass
@@ -88,9 +102,16 @@ class SONY:
                 s.post(url, data=payload, verify=self.verify)
 
                 if '~0~' not in s.cookies['_abck']:
-                    msg = "Invalid _abck cookie"
+                    msg = "Invalid _abck cookie, setting default"
                     self.notification_msg(self.localized(30200), msg)
-                    sys.exit()
+                    if self.default_abck['Expiration'] > time.time():
+                        msg = "Setting default _abck cookie"
+                        self.notification_msg(self.localized(30200), msg)
+
+                        s.cookies['_abck'] = self.default_abck['Cookie']
+                        s.cookies['bm_sz'] = self.default_bmsz['Cookie']
+                    else:
+                        sys.exit()
 
                 self.save_cookies(s.cookies)
 
