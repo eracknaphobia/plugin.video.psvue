@@ -1,8 +1,10 @@
 import sys, os, xbmc, xbmcaddon, xbmcgui
 import cookielib, requests, urllib
 import math, random, time
-from collections import OrderedDict
-
+try:
+    from cookielib import Cookie, CookieJar         # Python 2
+except ImportError:
+    from http.cookiejar import Cookie, CookieJar    # Python 3
 
 class SONY:
     addon = xbmcaddon.Addon()
@@ -22,6 +24,25 @@ class SONY:
                     'Version/4.0 Chrome/72.0.3626.105 Safari/537.36'
     ua_sony = 'com.sony.snei.np.android.sso.share.oauth.versa.USER_AGENT'
     themis = 'https://themis.dl.playstation.net/themis/destro/redirect.html'
+
+
+    default_abck = {
+        'Cookie': 'C683BE9A9F01EB95C27D82081F4BA8EF~0~YAAQQSpdzObejy5rAQAAiwSKVgIgjwETrrU2OXhksPw2Sf38zYSivRuoAOt7' +
+                  'oeAp31PWeDGjnwnnJ0rD2qTKi581hEEbzAthIpp5jC+VaEl/8EDIp6UxuHSd0q7DgMolJcJ4re6nPovApwO9PM/rH1q5epq' +
+                  'lUi/khV+aKz8PVfddvIyN5Q6tO3VEwNqfSFkn5Th69lCfjOQXtKihgguK636Ol8F+kS4z7Eh8Teqlel91CiHhhdw0/O2i1X' +
+                  '3zcpGdi/JphttWSvx6Qap2jZ3gk/eQ/8/1ITg4fbF1+FhHqN1hRzLQmy8kzSsz9YrSrrRknCIShMFH6inTCfA=~-1~-1~-1',
+        'Domain': '.sonyentertainmentnetwork.com',
+        'Path': '/',
+        'Expiration': 1592061014  # Sat, 13 Jun 2020 15:10:14 GMT
+    }
+    default_bmsz = {
+        'Cookie': '850631B1AD8D9C9CF48F0ADEFCD188DA~YAAQRypdzIXu9jFrAQAAO2iJVgRBHqvRhyEHEH5IuKfGm4EDx0VOWSAGMS62Q2' +
+                  'BHQ1u01EnhqxLN8VmXvJsaCl9HgnlZmgU5joqKGMTGBp2AMM3C8AbVMhTmMiuD2B8uIKKmLfewDQQTi4naAUEMaeqJ80ozT' +
+                  '2bfQH6eijfBU2s+9unYyT42MO+/T1milmvNJl93mZLted3SsNZnmIYBKwxE',
+        'Domain': '.sonyentertainmentnetwork.com',
+        'Path': '/',
+        'Expiration': 1560539374  # Fri, 14 Jun 2019 19:09:34 GMT
+    }
     username = ''
     verify = False
 
@@ -88,9 +109,18 @@ class SONY:
                 s.post(url, data=payload, verify=self.verify)
 
                 if '~0~' not in s.cookies['_abck']:
-                    msg = "Invalid _abck cookie"
-                    self.notification_msg(self.localized(30200), msg)
-                    sys.exit()
+                    msg = "Received invalid _abck cookie"
+                    self.notification_msg(self.localized(30986), msg)
+                    if self.default_abck['Expiration'] > time.time():
+                        msg = "Setting default _abck cookie"
+                        self.notification_msg(self.localized(30986), msg)
+                        s.cookies.set('_abck', self.default_abck['Cookie'], domain=self.default_abck['Domain'],
+                                      path=self.default_abck['Path'])
+                        s.cookies.set('bm_sz', self.default_bmsz['Cookie'], domain=self.default_abck['Domain'],
+                                      path=self.default_abck['Path'])
+                        xbmc.log("Cookie set %s" % self.default_abck['Cookie'])
+                    else:
+                        sys.exit()
 
                 self.save_cookies(s.cookies)
 
