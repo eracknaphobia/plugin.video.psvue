@@ -1,10 +1,6 @@
 import sys, os, xbmc, xbmcaddon, xbmcgui
 import cookielib, requests, urllib
 import math, random, time
-try:
-    from cookielib import Cookie, CookieJar         # Python 2
-except ImportError:
-    from http.cookiejar import Cookie, CookieJar    # Python 3
 
 class SONY:
     addon = xbmcaddon.Addon()
@@ -34,14 +30,6 @@ class SONY:
         'Domain': '.sonyentertainmentnetwork.com',
         'Path': '/',
         'Expiration': 1592061014  # Sat, 13 Jun 2020 15:10:14 GMT
-    }
-    default_bmsz = {
-        'Cookie': '850631B1AD8D9C9CF48F0ADEFCD188DA~YAAQRypdzIXu9jFrAQAAO2iJVgRBHqvRhyEHEH5IuKfGm4EDx0VOWSAGMS62Q2' +
-                  'BHQ1u01EnhqxLN8VmXvJsaCl9HgnlZmgU5joqKGMTGBp2AMM3C8AbVMhTmMiuD2B8uIKKmLfewDQQTi4naAUEMaeqJ80ozT' +
-                  '2bfQH6eijfBU2s+9unYyT42MO+/T1milmvNJl93mZLted3SsNZnmIYBKwxE',
-        'Domain': '.sonyentertainmentnetwork.com',
-        'Path': '/',
-        'Expiration': 1560539374  # Fri, 14 Jun 2019 19:09:34 GMT
     }
     username = ''
     verify = False
@@ -115,8 +103,6 @@ class SONY:
                         msg = "Setting default _abck cookie"
                         self.notification_msg(self.localized(30986), msg)
                         s.cookies.set('_abck', self.default_abck['Cookie'], domain=self.default_abck['Domain'],
-                                      path=self.default_abck['Path'])
-                        s.cookies.set('bm_sz', self.default_bmsz['Cookie'], domain=self.default_abck['Domain'],
                                       path=self.default_abck['Path'])
                         xbmc.log("Cookie set %s" % self.default_abck['Cookie'])
                     else:
