@@ -300,3 +300,7 @@ msgstr ""
 msgctxt "#30985"
 msgid "Western"
 msgstr ""
+
+msgctxt "#30986"
+msgid "Cookie Error"
+msgstr ""
