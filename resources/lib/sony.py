@@ -2,6 +2,7 @@ import sys, os, xbmc, xbmcaddon, xbmcgui
 import cookielib, requests, urllib
 import math, random, time
 
+
 class SONY:
     addon = xbmcaddon.Addon()
     api_url = 'https://auth.api.sonyentertainmentnetwork.com/2.0'
@@ -9,7 +10,7 @@ class SONY:
     device_id = ''
     device_type = 'android_tv'
     localized = addon.getLocalizedString
-    login_client_id = '71a7beb8-f21a-47d9-a604-2e71bee24fe0'
+    login_client_id = '811e7389-7cf2-4927-87f9-e8db00078b12'
     andriod_tv_client_id = '0a5fe341-cb16-47d9-991e-0110fff49713'
     npsso = ''
     password = ''
@@ -21,16 +22,6 @@ class SONY:
     ua_sony = 'com.sony.snei.np.android.sso.share.oauth.versa.USER_AGENT'
     themis = 'https://themis.dl.playstation.net/themis/destro/redirect.html'
 
-
-    default_abck = {
-        'Cookie': 'C683BE9A9F01EB95C27D82081F4BA8EF~0~YAAQQSpdzObejy5rAQAAiwSKVgIgjwETrrU2OXhksPw2Sf38zYSivRuoAOt7' +
-                  'oeAp31PWeDGjnwnnJ0rD2qTKi581hEEbzAthIpp5jC+VaEl/8EDIp6UxuHSd0q7DgMolJcJ4re6nPovApwO9PM/rH1q5epq' +
-                  'lUi/khV+aKz8PVfddvIyN5Q6tO3VEwNqfSFkn5Th69lCfjOQXtKihgguK636Ol8F+kS4z7Eh8Teqlel91CiHhhdw0/O2i1X' +
-                  '3zcpGdi/JphttWSvx6Qap2jZ3gk/eQ/8/1ITg4fbF1+FhHqN1hRzLQmy8kzSsz9YrSrrRknCIShMFH6inTCfA=~-1~-1~-1',
-        'Domain': '.sonyentertainmentnetwork.com',
-        'Path': '/',
-        'Expiration': 1592061014  # Sat, 13 Jun 2020 15:10:14 GMT
-    }
     username = ''
     verify = False
 
@@ -81,48 +72,36 @@ class SONY:
 
         if self.username != '' and self.password != '':
             s = requests.Session()
-            if not self.valid_cookie("_abck"):
-                url = 'https://id.sonyentertainmentnetwork.com/public/8697028d4235bb0e7a5d1a9c92d95'
-                headers = {
-                    "Accept": "*/*",
-                    "Accept-Encoding": "gzip, deflate, br",
-                    "Accept-Language": "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7",
-                    'Connection': 'Keep-Alive',
-                    "User-Agent": self.ua_browser,
-                    "Referer": 'https://id.sonyentertainmentnetwork.com/'
-                }
 
-                s.get(url, headers=headers, verify=self.verify)
-                payload = self.get_sensor_data(s.cookies['_abck'])
-                s.post(url, data=payload, verify=self.verify)
-
-                if '~0~' not in s.cookies['_abck']:
-                    msg = "Received invalid _abck cookie"
-                    self.notification_msg(self.localized(30986), msg)
-                    if self.default_abck['Expiration'] > time.time():
-                        msg = "Setting default _abck cookie"
-                        self.notification_msg(self.localized(30986), msg)
-                        s.cookies.set('_abck', self.default_abck['Cookie'], domain=self.default_abck['Domain'],
-                                      path=self.default_abck['Path'])
-                        xbmc.log("Cookie set %s" % self.default_abck['Cookie'])
-                    else:
-                        sys.exit()
-
-                self.save_cookies(s.cookies)
+            better_referer = 'https://id.sonyentertainmentnetwork.com/id/tv/signin/' \
+                             '?ui=ds' \
+                             '&hidePageElements=noAccountSection,troubleSigningInLink&service_logo=ps' \
+                             '&smcid=tv:psvue' \
+                             '&client_id=811e7389-7cf2-4927-87f9-e8db00078b12' \
+                             '&response_type=code' \
+                             '&scope=psn:s2s,oauth:delete_token,kamaji:megaphone,kamaji:vue_metadata_services,versa:user_preview_order' \
+                             '&redirect_uri=https://theia.dl.playstation.net/destro/redirect.html' \
+                             '&state=119982410' \
+                             '&service_entity=urn:service-entity:np' \
+                             '&duid=' + self.device_id + \
+                             '&error=login_required' \
+                             '&error_code=4165' \
+                             '&error_description=User is not authenticated' \
+                             '&no_captcha=false'
 
             url = self.api_url + '/ssocookie'
+            # "Referer": "https://id.sonyentertainmentnetwork.com/",
             headers = {
                 "Host": "auth.api.sonyentertainmentnetwork.com",
-                "X-Referer-Info": "https://id.sonyentertainmentnetwork.com/signin/",
+                "X-Requested-With": "com.snei.vue.atv",
                 "Origin": "https://id.sonyentertainmentnetwork.com",
                 "User-Agent": self.ua_browser,
                 "Content-Type": "application/json; charset=UTF-8",
                 "Accept": "*/*",
-                "Referer": "https://id.sonyentertainmentnetwork.com/",
+                "Referer": urllib.quote(better_referer),
                 "Accept-Encoding": "gzip, deflate, br",
                 "Accept-Language": "en-US,en;q=0.9,ru-UA;q=0.8,ru;q=0.7"
             }
-
 
             json_payload = {
                 "authentication_type": "password",
