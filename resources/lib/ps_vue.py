@@ -1,12 +1,6 @@
-import sys, os
-import xbmc, xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
-import random
-import cookielib, urllib
-import requests
 import simplecache
-import time
-from datetime import datetime, timedelta
 from sony import SONY
+from globals import *
 
 
 def main_menu():
