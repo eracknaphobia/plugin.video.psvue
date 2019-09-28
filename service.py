@@ -1,3 +1,5 @@
-if __name__ == '__main__':
-    from resources.lib.mainservice import MainService
+from resources.lib.mainservice import MainService
+import xbmcaddon
+
+if xbmcaddon.Addon().getSetting(id='disable_epg') == 'false':
     MainService()

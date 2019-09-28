@@ -6,7 +6,7 @@ from guideservice import BuildGuide
 class MainService:
     monitor = None
     last_update = None
-    
+
     def __init__(self):
         self.monitor = xbmc.Monitor()
 
