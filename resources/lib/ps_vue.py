@@ -437,7 +437,7 @@ def list_episode(show):
         vbadge = vbadge + '[COLOR=springgreen]VOD[/COLOR] '
     name = vbadge + title
 
-    # Add resumetime if applicable
+    # Add resumetime if applicable and start recordings at 00:05:00 if chosen
     resumetime=''
     if 'last_timecode' in show['airings'][air_num]:
         resumetime = str(show['airings'][air_num]['last_timecode'])
@@ -447,6 +447,8 @@ def list_episode(show):
             h,m,s,ms = resumetime.split(':')
         resumetime = str(int(h) * 3600 + int(m) * 60 + int(s))
 
+    if (resumetime=="0" or not resumetime) and (str(show['airings'][0]['badge'])=="dvr" or str(show['airings'][0]['badge'])=="catchup"):
+        resumetime="300"
     show_url = SHOW_URL + '/' + airing_id
 
     info = {
