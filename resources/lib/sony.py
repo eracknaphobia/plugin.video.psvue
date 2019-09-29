@@ -1,6 +1,5 @@
 from globals import *
 
-
 class SONY:
     addon = xbmcaddon.Addon()
     api_url = 'https://auth.api.sonyentertainmentnetwork.com/2.0'
