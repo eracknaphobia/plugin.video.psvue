@@ -1,12 +1,6 @@
-import sys, os
-import xbmc, xbmcplugin, xbmcgui, xbmcaddon, xbmcvfs
-import random
-import cookielib, urllib
-import requests
 import simplecache
-import time
-from datetime import datetime, timedelta
 from sony import SONY
+from globals import *
 
 
 def main_menu():
@@ -443,7 +437,7 @@ def list_episode(show):
         vbadge = vbadge + '[COLOR=springgreen]VOD[/COLOR] '
     name = vbadge + title
 
-    # Add resumetime if applicable
+    # Add resumetime if applicable and start recordings at 00:05:00 if chosen
     resumetime=''
     if 'last_timecode' in show['airings'][air_num]:
         resumetime = str(show['airings'][air_num]['last_timecode'])
@@ -453,6 +447,8 @@ def list_episode(show):
             h,m,s,ms = resumetime.split(':')
         resumetime = str(int(h) * 3600 + int(m) * 60 + int(s))
 
+    if (resumetime=="0" or not resumetime) and (str(show['airings'][0]['badge'])=="dvr" or str(show['airings'][0]['badge'])=="catchup"):
+        resumetime="300"
     show_url = SHOW_URL + '/' + airing_id
 
     info = {
@@ -944,21 +940,16 @@ def check_device_id():
 
 
 _cache = simplecache.SimpleCache()
-ADDON = xbmcaddon.Addon()
 addon_handle = int(sys.argv[1])
 ADDON_PATH_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
 CHANNEL_LOGO_WIDTH = 440
 CHANNEL_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/channel'
-EPG_URL = 'https://epg-service.totsuko.tv/epg_service_sony/service/v2'
 EXPORT_DATE = string_to_date("1970-01-01T00:00:00.000Z", "%Y-%m-%dT%H:%M:%S.%fZ")
 LOCAL_STRING = ADDON.getLocalizedString
 PROFILE_ID = ADDON.getSetting(id='default_profile')
 ROOTDIR = ADDON.getAddonInfo('path')
-SHOW_URL = 'https://media-framework.totsuko.tv/media-framework/media/v2.1/stream/airing/'
 UA_ANDROID = 'Mozilla/5.0 (Linux; Android 6.0.1; Build/MOB31H; wv) AppleWebKit/537.36 (KHTML, like Gecko) ' \
              'Version/4.0 Chrome/44.0.2403.119 Safari/537.36'
-UA_ANDROID_TV = 'Mozilla/5.0 (Linux; Android 6.0.1; Hub Build/MHC19J; wv) AppleWebKit/537.36 (KHTML, like Gecko) ' \
-                'Version/4.0 Chrome/61.0.3163.98 Safari/537.36'
 VERIFY = False
 
 FANART = os.path.join(ROOTDIR, "resources", "fanart.jpg")

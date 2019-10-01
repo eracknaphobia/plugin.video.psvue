@@ -1,7 +1,4 @@
-import sys, os, xbmc, xbmcaddon, xbmcgui
-import cookielib, requests, urllib
-import math, random, time
-
+from globals import *
 
 class SONY:
     addon = xbmcaddon.Addon()
