@@ -47,8 +47,8 @@
     </category>
     <!--EPG-->
     <category label="30330">
-        <setting id="disable_epg" type="bool" label="30337"  default="false"/>
-        <setting id="epg_on_start" type="bool" label="30334"  default="true" enable="eq(-1,false)"/>
+        <setting id="disable_epg" type="bool" label="30337"  default="true"/>
+        <setting id="epg_on_start" type="bool" label="30334"  default="false" enable="eq(-1,false)"/>
         <setting id="epg_days" type="slider" label="30335" default="2" range="1,1,7" option="int" enable="eq(-2,false)"/>
         <setting id="epg_interval" type="slider" label="30336" default="1" range="1,1,24" option="int" enable="eq(-3,false)"/>
         <setting id="custom_directory" type="bool" label="30331"  default="false" enable="eq(-4,false)"/>
