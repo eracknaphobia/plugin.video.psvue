@@ -248,6 +248,38 @@ msgctxt "#30337"
 msgid "Disable EPG Service (Restart After Changing)"
 msgstr ""
 
+msgctxt "#30350"
+msgid "Where would you like to watch this episode?"
+msgstr ""
+
+msgctxt "#30351"
+msgid "Click an item below to choose your preference"
+msgstr ""
+
+msgctxt "#30352"
+msgid "ON DEMAND"
+msgstr ""
+
+msgctxt "#30353"
+msgid "DVR"
+msgstr ""
+
+msgctxt "#30360"
+msgid "PS Vue EPG"
+msgstr ""
+
+msgctxt "#30361"
+msgid "Please enable PVR IPTV Simple Client"
+msgstr ""
+
+msgctxt "#30371"
+msgid "IPTV Simple needs to be restarted. Do you want to allow this?"
+msgstr ""
+
+msgctxt "#30372"
+msgid "IPTV Simple settings need to be set changed in order to allow ps vue content. Do you want to allow this?"
+msgstr ""
+
 msgctxt "#30897"
 msgid "<< Prev."
 msgstr ""

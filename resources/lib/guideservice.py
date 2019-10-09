@@ -49,7 +49,7 @@ class BuildGuide(threading.Thread):
 
             xbmc.log('BuildGuide: before loop')
             thread_alive = True
-            while thread_alive:
+            while not xbmc.abortRequested() and thread_alive:
                 thread_alive = False
                 if self.guide_thread_2.isAlive() or self.guide_thread_3.isAlive() or self.guide_thread_4.isAlive():
                     thread_alive = True
@@ -62,14 +62,16 @@ class BuildGuide(threading.Thread):
             self.db.clean_db_epg()
             self.db.build_epg_xml()
             if first_time_thru:
-                xbmc.log('BuildGuide: First time thru, toggling IPTV restart')
-                pvr_toggle_off = '{"jsonrpc": "2.0", "method": "Addons.SetAddonEnabled", ' \
-                                 '"params": {"addonid": "pvr.iptvsimple", "enabled": false}, "id": 1}'
-                pvr_toggle_on = '{"jsonrpc": "2.0", "method": "Addons.SetAddonEnabled", ' \
-                                '"params": {"addonid": "pvr.iptvsimple", "enabled": true}, "id": 1}'
-                xbmc.executeJSONRPC(pvr_toggle_off)
-                xbmc.executeJSONRPC(pvr_toggle_on)
-                first_time_thru = False
+                restart_iptv = xbmcgui.Dialog().yesno(LOCAL_STRING(30360), LOCAL_STRING(30371))
+                if restart_iptv:
+                    xbmc.log('BuildGuide: First time thru, toggling IPTV restart')
+                    pvr_toggle_off = '{"jsonrpc": "2.0", "method": "Addons.SetAddonEnabled", ' \
+                                     '"params": {"addonid": "pvr.iptvsimple", "enabled": false}, "id": 1}'
+                    pvr_toggle_on = '{"jsonrpc": "2.0", "method": "Addons.SetAddonEnabled", ' \
+                                    '"params": {"addonid": "pvr.iptvsimple", "enabled": true}, "id": 1}'
+                    xbmc.executeJSONRPC(pvr_toggle_off)
+                    xbmc.executeJSONRPC(pvr_toggle_on)
+                    first_time_thru = False
 
             if self.monitor.waitForAbort(self.update_interval):
                 break

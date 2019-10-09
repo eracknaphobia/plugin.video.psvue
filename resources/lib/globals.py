@@ -12,7 +12,7 @@ import _strptime
 
 if not xbmc.getCondVisibility('System.HasAddon(pvr.iptvsimple)'):
     dialog = xbmcgui.Dialog()
-    dialog.notification('PS Vue EPG', 'Please enable PVR IPTV Simple Client', xbmcgui.NOTIFICATION_INFO, 5000, False)
+    dialog.notification(LOCAL_STRING(30360), LOCAL_STRING(30361), xbmcgui.NOTIFICATION_INFO, 5000, False)
     sys.exit()
 
 ADDON = xbmcaddon.Addon()

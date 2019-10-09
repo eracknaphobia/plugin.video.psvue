@@ -120,7 +120,8 @@ elif mode == 900:
 
 elif mode == 950:
     if vod != airing_id:
-        choice = xbmcgui.Dialog().yesno("Where would you like to watch this episode?","Click an item below to choose your preference", nolabel='ON DEMAND', yeslabel='DVR')
+        choice = xbmcgui.Dialog().yesno(LOCAL_STRING(30350),LOCAL_STRING(30351), nolabel=LOCAL_STRING(30352),
+                                        yeslabel=LOCAL_STRING(30353))
         if choice:
             get_stream(url, airing_id, channel_id, program_id, series_id, tms_id, title, plot, icon)
         else:
